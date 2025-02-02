@@ -1,118 +1,134 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import WelcomeScreen from "./WelcomeScreen";
+import ProfileScreen from "./ProfileScreen";
+import PlayerListScreen from "./PlayerListScreen";
+import DraftScreen from "./DraftScreen";
+import MyTeamScreen from "./MyTeamScreen";
+import playerData from "./assets/Matchday1Stats.json";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const Stack = createStackNavigator();
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const Tab = createMaterialTopTabNavigator();
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+function MainTabs( { currentUser, users, updateUserRoster } ) {
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const [availablePlayers, setAvailablePlayers] = useState([...playerData]);
+  const [team1Roster, setTeam1Roster] = useState([]); // State for drafted players
+  const userProfile = {
+    teamName : currentUser.teamName,
+    userName : currentUser.userName,
   };
 
+  //console.log("Players Data:", playerData[0]);
+
+  const updatePlayerList = (player) => {
+    setAvailablePlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name)); 
+  };
+
+  const handleDrop = (player) => {
+    setTeam1Roster((prevRoster) => prevRoster.filter((p) => p.name !== player.name));
+    setAvailablePlayers((prevPlayers) => [...prevPlayers, player]); // Add back to Player List
+  };
+  
+  const handleAddPlayer = (player) => {
+    setAvailablePlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
+    setTeam1Roster((prevRoster) => [...prevRoster, player]); // Add player to My Team
+  };
+
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <Tab.Navigator
+      screenOptions={{
+        tabBarStyle: { backgroundColor: "#121212" },
+        tabBarIndicatorStyle: { backgroundColor: "#4CAF50" },
+        tabBarLabelStyle: { color: "#fff", fontWeight: "bold" },
+      }}
+    >
+      <Tab.Screen name="Players"> 
+        {() => <PlayerListScreen key={availablePlayers.length} playerData={availablePlayers} onAdd={handleAddPlayer} teamRoster={currentUser.roster}/>}
+      </Tab.Screen>
+
+
+      <Tab.Screen name="Draft">
+        {() => (
+          <DraftScreen
+            playerList={availablePlayers}
+            onPick={updatePlayerList}
+            //onNotify={(updateFn) => updateUserRoster(currentUser.id, updateFn)} 
+            //userProfile={currentUser}
+            users={users}
+            updateUserRoster={updateUserRoster} 
+          />
+        )}
+      </Tab.Screen>
+
+      <Tab.Screen name="My Team">
+        {() => <MyTeamScreen roster={currentUser.roster} onDrop={handleDrop} userProfile={currentUser} />}
+      </Tab.Screen>
+
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+const App = () => {
+  const [users, setUsers] = useState<{ id: number; teamName: string; userName: string; roster: any[] }[]>([]);; // Store multiple users
+  //const [userProfile, setUserProfile] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  const addUser = (teamName, userName) => {
+    console.log(userName);
+    const newUser = {
+      id: users.length + 1,
+      teamName: teamName,
+      userName: userName,
+      roster: [],
+    };
+    setUsers([...users, newUser]);
+    setCurrentUserId(newUser.id);
+
+  };
+
+  const updateUserRoster = (userId, newRoster) => {
+    setUsers((prevUsers) => prevUsers.map((user) => 
+      user.id === userId ? { ...user, roster: typeof newRoster === "function" ? newRoster(user.roster) : newRoster } : user
+      )
+    );
+    const temp = users.find((user) => user.id === userId);
+    console.log(temp.teamName);
+
+  };
+
+  const currentUser = users.find((user) => user.id === currentUserId);
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+
+          <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
+          <Stack.Screen name="ProfileScreen">
+                {({ navigation }) => (
+                <ProfileScreen navigation = {navigation} onSave={addUser} />)}
+          </Stack.Screen>
+          <Stack.Screen name="LoginScreen">
+                {({ navigation }) => <LoginScreen users={users} onSelect={setCurrentUserId} navigation={navigation} />}
+              </Stack.Screen>
+          <Stack.Screen name="MainTabs">
+            {() => <MainTabs currentUser={currentUser} users={users} updateUserRoster={updateUserRoster} />}
+          </Stack.Screen>
+
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
+  );
+};
 
 export default App;
+
+
+

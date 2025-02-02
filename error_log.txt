@@ -1,0 +1,27 @@
+Match table not found on team page.
+Match table not found on team page.
+Match table not found on team page.
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL: int() argument must be a string, a bytes-like object or a real number, not 'builtin_function_or_method'
+Error processing player row in match https://fbref.com/en/matches/5a808fa8/Gotham-FC-San-Diego-Wave-March-15-2024-NWSL-Challenge-Cup: name 'noGKs' is not defined
+Error processing player row in match https://fbref.com/en/matches/5a808fa8/Gotham-FC-San-Diego-Wave-March-15-2024-NWSL-Challenge-Cup: list index out of range
+Error processing player row in match https://fbref.com/en/matches/5a808fa8/Gotham-FC-San-Diego-Wave-March-15-2024-NWSL-Challenge-Cup: list index out of range
+Error processing player row in match https://fbref.com/en/matches/5a808fa8/Gotham-FC-San-Diego-Wave-March-15-2024-NWSL-Challenge-Cup: list index out of range
+Error processing player row in match https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL: name 'cells' is not defined
+Error processing player row in match https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL: name 'cells' is not defined
+Error processing player row in match https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL: list index out of range
+Error processing player row in match https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL: list index out of range

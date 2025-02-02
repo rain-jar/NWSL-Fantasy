@@ -1,0 +1,72 @@
+[
+    {
+        "name": "Barbra Banda",
+        "position": "FW",
+        "team": "Orlando Pride",
+        "goals": "13",
+        "assists": "6"
+    },
+    {
+        "name": "Anna Moorhouse",
+        "position": "GK",
+        "team": "Orlando Pride",
+        "goals": "N/A",
+        "assists": "N/A"
+    },
+    {
+        "name": "Ouleymata Sarr",
+        "position": "FW",
+        "team": "Washington Spirit",
+        "goals": "8",
+        "assists": "2"
+    },
+    {
+        "name": "Trinity Rodman",
+        "position": "FW-MF",
+        "team": "Washington Spirit",
+        "goals": "8",
+        "assists": "6"
+    },
+    {
+        "name": "Aubrey Kingsbury",
+        "position": "GK",
+        "team": "Washington Spirit",
+        "goals": "N/A",
+        "assists": "N/A"
+    },
+    {
+        "name": "Esther Gonz\u00e1lez",
+        "position": "FW",
+        "team": "Gotham FC",
+        "goals": "9",
+        "assists": "4"
+    },
+    {
+        "name": "Ann-Katrin Berger",
+        "position": "GK",
+        "team": "Gotham FC",
+        "goals": "N/A",
+        "assists": "N/A"
+    },
+    {
+        "name": "Temwa Cha\u0175inga",
+        "position": "FW",
+        "team": "Kansas City Current",
+        "goals": "20",
+        "assists": "5"
+    },
+    {
+        "name": "Adrianna Franch",
+        "position": "GK",
+        "team": "Kansas City Current",
+        "goals": "N/A",
+        "assists": "N/A"
+    },
+    {
+        "name": "Ashley Sanchez",
+        "position": "FW-MF",
+        "team": "North Carolina Courage",
+        "goals": "5",
+        "assists": "4"
+    }
+]

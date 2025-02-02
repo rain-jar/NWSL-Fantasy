@@ -1,0 +1,47 @@
+name,PositionTemp,team,Opponent,Minutes,goals,assists,PKMissed,Goals Against,Saves,Clean Sheet,Yellow Cards,Red Cards,Match URL,position,FantasyPoints
+Ashley Hatch,FW,Spirit,Reign,64,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,FW,2
+Courtney Brown,FW,Spirit,Reign,26,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,FW,1
+Ouleymata Sarr,LW,Spirit,Reign,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,FW,2
+Brittany Ratcliffe,RW,Spirit,Reign,64,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,FW,2
+Makenna Morris,AM,Spirit,Reign,26,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,MF,1
+Croix Bethune,AM,Spirit,Reign,89,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,MF,2
+Lyza Bosselmann,GK,Spirit,Reign,1,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,GK,1
+Hal Hershfelt,DM,Spirit,Reign,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,MF,2
+Andi Sullivan,DM,Spirit,Reign,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,MF,2
+Kate Wiesner,LB,Spirit,Reign,44,0,0,0,1,0,False,1,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,DF,0
+Anaïg Butel,LB,Spirit,Reign,46,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,DF,1
+Casey Krueger,CB,Spirit,Reign,90,0,0,0,1,0,False,1,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,DF,1
+Tara McKeown,CB,Spirit,Reign,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,DF,2
+Gabrielle Carle,RB,Spirit,Reign,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,DF,2
+Aubrey Kingsbury,GK,Spirit,Reign,89,0,0,0,1,5,False,0,1,https://fbref.com/en/matches/96e0dd2c/Seattle-Reign-FC-Washington-Spirit-March-17-2024-NWSL,GK,0
+Esther González,FW,Gotham FC,Wave,89,1,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,FW,6
+Taryn Torres,FW,Gotham FC,Wave,1,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,FW,1
+Crystal Dunn,LW,Gotham FC,Wave,65,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,FW,2
+Katie Stengel,LW,Gotham FC,Wave,25,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,FW,1
+Margaret Purce,RW,Gotham FC,Wave,44,0,0,0,1,0,False,1,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,FW,0
+Yazmeen Ryan,RW,Gotham FC,Wave,46,0,1,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,FW,4
+Emily Sonnett,LM,Gotham FC,Wave,90,0,0,0,1,0,False,1,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,MF,1
+Nealy Martin,CM,Gotham FC,Wave,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,MF,2
+Delanie Sheehan,RM,Gotham FC,Wave,90,0,0,0,1,0,False,1,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,MF,1
+Jenna Nighswonger,LB,Gotham FC,Wave,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,DF,2
+Tierna Davidson,CB,Gotham FC,Wave,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,DF,2
+Samantha Hiatt,CB,Gotham FC,Wave,90,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,DF,2
+Kelley O'Hara,RB,Gotham FC,Wave,65,0,0,0,1,0,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,DF,2
+Bruninha,RB,Gotham FC,Wave,25,0,0,0,1,0,False,1,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,DF,0
+Cassie Miller,GK,Gotham FC,Wave,90,0,0,0,1,6,False,0,0,https://fbref.com/en/matches/d91aea7c/Portland-Thorns-FC-Gotham-FC-March-24-2024-NWSL,GK,4
+Adriana,"FW,RW",Pride,Louisville,90,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,FW,2
+Angelina,LW,Pride,Louisville,90,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,FW,2
+Julie Doyle,"RW,FW,LB",Pride,Louisville,82,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,DF-FW,1
+Amanda Allen,LB,Pride,Louisville,8,0,1,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,DF,3
+Marta,AM,Pride,Louisville,70,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,MF,2
+Brianna Martinez,"RW,AM",Pride,Louisville,20,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,FW-MF,1
+Morgan Gautrat,DM,Pride,Louisville,70,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,MF,2
+Summer Yates,"AM,DM",Pride,Louisville,20,1,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,MF,6
+Luana,DM,Pride,Louisville,74,0,0,0,2,0,False,1,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,MF,1
+Ally Lemos,"DM,AM",Pride,Louisville,16,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,MF,1
+Kerry Abello,"LB,CB",Pride,Louisville,90,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,DF,1
+Kylie Strom,CB,Pride,Louisville,61,0,0,0,2,0,False,2,1,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,DF,-4
+Emily Sams,CB,Pride,Louisville,90,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,DF,1
+Haley Hanson,RB,Pride,Louisville,82,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,DF,1
+Celia Jiménez,RB,Pride,Louisville,8,0,0,0,2,0,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,DF,0
+Anna Moorhouse,GK,Pride,Louisville,90,0,0,0,2,2,False,0,0,https://fbref.com/en/matches/580abedf/Racing-Louisville-Orlando-Pride-March-16-2024-NWSL,GK,1
