@@ -1,15 +1,23 @@
 import React, { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
 import PlayerRow from "./PlayerRow";
 import TeamRoster from "./TeamRoster";
 import playerData from "./assets/players.json";
 
 
 
-const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUserRoster }) => {
+let currentRound = 1;
+let currentPick = 0;
+let draftOrder = []; // Initialize draft order
+
+
+
+const DraftScreen = ({ playerList, onPick, currentUser, navigation, users, updateUserRoster }) => {
 
     const [players, setPlayers] = useState(playerList);
     const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
+    const [draftTurn, setdraftTurn] = useState(false);
+    
 
     const teams = users.map((user) => ({
         id: user.id,
@@ -17,10 +25,9 @@ const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUs
         roster: user.roster,
       }));
 
-
-    let draftOrder = [...teams]; // Start in normal order 
-    let currentRound = 1;
-    let currentPick = 0;
+    if(currentRound === 1 && currentPick === 0){
+        draftOrder = [...teams]; // Set it once and for all 
+    }
 
 // Position Constraints
     const maxPlayersPerTeam = 11;
@@ -41,6 +48,7 @@ const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUs
             currentRound++;
             draftOrder.reverse(); // Reverse the draft order for the next round
             currentPick = 0;
+            console.log("Pick order has reversed. Current Pick is " + currentPick);
         }
     }
 
@@ -100,8 +108,13 @@ const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUs
 // DraftScreen Component
 
     const handleDraft = (player) => {
-        // console.log(currentTeam.name);
+        console.log("Drafting team is "+ currentTeam.name);
 
+        if (currentUser.id != currentTeam.id){
+            console.log ("It's not the current user's turn");
+            setdraftTurn(true);
+            return false;
+        }
         const team = teams.find(t => t.id === currentTeam.id);
 
         if (!team || !playerList.includes(player) || !isValidPick(team, player)) {
@@ -119,7 +132,10 @@ const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUs
     //    const success = draftPlayer(currentTeam.id, player, playerList, teams);
     //    if (success) {
             updateUserRoster(currentTeam.id, (prevRoster) => [...prevRoster, { ...player, assignedPosition }]);
+
             setPlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
+            console.log(`${team.name} drafted ${player.name} as ${assignedPosition}`);
+
 
         //setPlayers([...playerList]); // Update available players
         // if (currentTeam.id === 1) {
@@ -127,6 +143,7 @@ const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUs
             //onNotify((prevRoster) => [...prevRoster, player]); // Notify App about Team 1's updated roster
         // }
             nextTurn();
+            console.log('current Team is ' + draftOrder[currentPick].name);
             setCurrentTeam(draftOrder[currentPick]); // Update current team
             onPick(player);
     //    }
@@ -137,7 +154,8 @@ const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUs
     <View style={styles.container}>
       <Text style={styles.title}>Snake Draft</Text>
       <Text style={styles.currentTeam}>
-        {draftOrder[currentPick]?.name}'s Turn - Round {currentRound}
+        {currentTeam.name}'s Turn - Round {currentRound}
+         Player's left: {players.length}
       </Text>
 
       {/* Player List */}
@@ -145,7 +163,9 @@ const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUs
         data={players}
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <PlayerRow player={item} onDraft={() => handleDraft(item)} />
+          <PlayerRow player={item} onDraft={() => {
+            console.log("Current User is " + currentUser.teamName);
+            handleDraft(item);}} />
         )}
       />
 
@@ -161,6 +181,28 @@ const DraftScreen = ({ playerList, onPick, onNotify, navigation, users, updateUs
       <TouchableOpacity onPress={() => navigation.navigate("My Team")}>
         <Text style={styles.viewMyTeam}>View My Team</Text>
       </TouchableOpacity>
+
+              {/* Drafting Turn Check */}
+        <Modal visible={!!draftTurn} transparent animationType="slide">
+            <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+                <Text style={styles.modalText}>User Team is: {currentUser?.teamName}</Text>
+                <Text style={styles.modalText}>Draft Turn is for: {currentTeam?.name}</Text>
+                <Text style={styles.modalText}>It's not your turn</Text>
+
+                <View style={styles.modalbutton}>
+                        <TouchableOpacity style={styles.buttonStyle} title="OK" onPress={() => setdraftTurn(false)}>
+                          <Text style={styles.buttonText}>OK</Text>
+                        </TouchableOpacity>
+
+                </View>
+            </View>
+            </View>
+        </Modal>
+
+
+
+
     </View>
   );
 };
@@ -171,6 +213,12 @@ const styles = StyleSheet.create({
   currentTeam: { color: "#fff", fontSize: 18, marginBottom: 10, textAlign: "center" },
   teamRosters: { marginTop: 20, maxHeight : "100" },
   viewMyTeam: { color: "#4CAF50", fontSize: 16, textAlign: "center", marginTop: 20, textDecorationLine: "underline" },
+  modalContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  modalContent: { backgroundColor: "#1E1E1E", padding: 20, borderColor:"#4CAF50", borderRadius: 10, borderWidth: 1,  alignItems: "center" },
+  modalText: { color:"#fff",fontSize: 18, fontWeight: "bold", marginBottom: 10, paddingBottom:10 },
+  modalbutton: { backgroundColor: "1e1e1e", flexDirection: "row", justifyContent: "space-between", width: "40%" },
+  buttonStyle: { backgroundColor: "#4CAF50", paddingVertical: 5, paddingHorizontal: 15, borderRadius: 4 },
+  buttonText: {color: "#fff"},
 });
 
 export default DraftScreen;

@@ -12,10 +12,11 @@ const ProfileScreen = ({ navigation, onSave }) => {
     }
     
     profile = [{ tN: teamName, uN: userName}];
-    console.log("profile" + teamName);
+    //console.log("Profile to App.tsx");
     onSave(teamName, userName);
 
     // Reset navigation to MainTabs with updated profile
+    //console.log("Profile to MainTabs");
     navigation.reset({
         index: 0,
         routes: [{ name: "MainTabs" }],

@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
 
 const WelcomeScreen = ({ navigation }) => {
+    
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to NWSL Fantasy!</Text>
@@ -9,7 +10,10 @@ const WelcomeScreen = ({ navigation }) => {
 
       <Button title="Create Profile" onPress={() => navigation.navigate("ProfileScreen")} />
       <View style={styles.buttonSpacing} />
-      <Button title="Existing User" onPress={() => navigation.navigate("LoginScreen")} />
+      <Button title="Existing User" onPress={() => {
+        //console.log("Going back to Login");
+        navigation.navigate("ProfileList");
+    }} />
 
     </View>
   );

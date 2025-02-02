@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import WelcomeScreen from "./WelcomeScreen";
 import ProfileScreen from "./ProfileScreen";
 import PlayerListScreen from "./PlayerListScreen";
+import ProfileList from "./ProfileList";
 import DraftScreen from "./DraftScreen";
 import MyTeamScreen from "./MyTeamScreen";
 import playerData from "./assets/Matchday1Stats.json";
@@ -15,9 +17,10 @@ const Stack = createStackNavigator();
 
 const Tab = createMaterialTopTabNavigator();
 
-function MainTabs( { currentUser, users, updateUserRoster } ) {
+function MainTabs( { navigation, currentUser, users, updateUserRoster, availablePlayers, setAvailablePlayers } ) {
 
-  const [availablePlayers, setAvailablePlayers] = useState([...playerData]);
+  //console.log("In Main Tabs");
+
   const [team1Roster, setTeam1Roster] = useState([]); // State for drafted players
   const userProfile = {
     teamName : currentUser.teamName,
@@ -27,17 +30,17 @@ function MainTabs( { currentUser, users, updateUserRoster } ) {
   //console.log("Players Data:", playerData[0]);
 
   const updatePlayerList = (player) => {
-    setAvailablePlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name)); 
+     setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name));
   };
 
   const handleDrop = (player) => {
-    setTeam1Roster((prevRoster) => prevRoster.filter((p) => p.name !== player.name));
+    //setTeam1Roster((prevRoster) => prevRoster.filter((p) => p.name !== player.name));
     setAvailablePlayers((prevPlayers) => [...prevPlayers, player]); // Add back to Player List
   };
   
   const handleAddPlayer = (player) => {
-    setAvailablePlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
-    setTeam1Roster((prevRoster) => [...prevRoster, player]); // Add player to My Team
+    setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name));
+   // setTeam1Roster((prevRoster) => [...prevRoster, player]); // Add player to My Team
   };
 
 
@@ -60,7 +63,7 @@ function MainTabs( { currentUser, users, updateUserRoster } ) {
             playerList={availablePlayers}
             onPick={updatePlayerList}
             //onNotify={(updateFn) => updateUserRoster(currentUser.id, updateFn)} 
-            //userProfile={currentUser}
+            currentUser={currentUser}
             users={users}
             updateUserRoster={updateUserRoster} 
           />
@@ -68,7 +71,24 @@ function MainTabs( { currentUser, users, updateUserRoster } ) {
       </Tab.Screen>
 
       <Tab.Screen name="My Team">
-        {() => <MyTeamScreen roster={currentUser.roster} onDrop={handleDrop} userProfile={currentUser} />}
+        {() => (
+          <View style={{ flex: 1 }}>
+            <MyTeamScreen 
+              roster={currentUser.roster} 
+              onDrop={handleDrop} 
+              userProfile={currentUser} 
+            />
+            <TouchableOpacity 
+              onPress={() => {
+                //console.log("Going back to Welcome");
+                navigation.reset({ index: 0, routes: [{ name: "WelcomeScreen" }] });
+              }}
+              style={{ margin: 20, padding: 10, backgroundColor: "#f55" }}
+            >
+              <Text style={{ color: "#fff", textAlign: "center" }}>Switch User</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </Tab.Screen>
 
     </Tab.Navigator>
@@ -79,9 +99,10 @@ const App = () => {
   const [users, setUsers] = useState<{ id: number; teamName: string; userName: string; roster: any[] }[]>([]);; // Store multiple users
   //const [userProfile, setUserProfile] = useState([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [availablePlayers, setAvailablePlayers] = useState([...playerData]);
+
 
   const addUser = (teamName, userName) => {
-    console.log(userName);
     const newUser = {
       id: users.length + 1,
       teamName: teamName,
@@ -90,7 +111,7 @@ const App = () => {
     };
     setUsers([...users, newUser]);
     setCurrentUserId(newUser.id);
-
+    //console.log("App.tsx back to Profile");
   };
 
   const updateUserRoster = (userId, newRoster) => {
@@ -99,7 +120,7 @@ const App = () => {
       )
     );
     const temp = users.find((user) => user.id === userId);
-    console.log(temp.teamName);
+    //console.log(temp.teamName);
 
   };
 
@@ -112,15 +133,25 @@ const App = () => {
 
           <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
           <Stack.Screen name="ProfileScreen">
-                {({ navigation }) => (
-                <ProfileScreen navigation = {navigation} onSave={addUser} />)}
+              {({ navigation }) => (
+              <ProfileScreen navigation = {navigation} onSave={addUser} />)}
           </Stack.Screen>
-          <Stack.Screen name="LoginScreen">
-                {({ navigation }) => <LoginScreen users={users} onSelect={setCurrentUserId} navigation={navigation} />}
-              </Stack.Screen>
+          <Stack.Screen name="ProfileList">
+              {({ navigation }) => 
+                <ProfileList users={users} onSelect={setCurrentUserId} navigation={navigation} />}
+          </Stack.Screen>
+
+          {/* Main App (Shown Only After Login) */}
           <Stack.Screen name="MainTabs">
-            {() => <MainTabs currentUser={currentUser} users={users} updateUserRoster={updateUserRoster} />}
+            {({ navigation }) =>
+              currentUserId ? (
+                <MainTabs currentUser={currentUser} users={users} updateUserRoster={updateUserRoster}  availablePlayers={availablePlayers} setAvailablePlayers={setAvailablePlayers} navigation={navigation} />
+              ) : (
+                <WelcomeScreen navigation={navigation} />
+              )
+            }
           </Stack.Screen>
+
 
         </Stack.Navigator>
       </NavigationContainer>
