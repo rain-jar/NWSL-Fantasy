@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import PlayerRow from "./PlayerRow";
 import TeamRoster from "./TeamRoster";
 import playerData from "./assets/players.json";
@@ -12,7 +13,9 @@ let draftOrder = []; // Initialize draft order
 
 
 
-const DraftScreen = ({ playerList, onPick, currentUser, navigation, users, updateUserRoster }) => {
+const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster }) => {
+
+    const navigation = useNavigation();
 
     const [players, setPlayers] = useState(playerList);
     const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
@@ -171,14 +174,14 @@ const DraftScreen = ({ playerList, onPick, currentUser, navigation, users, updat
 
       {/* Team Rosters */}
       
-        <View style={styles.teamRosters}>
+{/*         <View style={styles.teamRosters}>
             {teams.map((team) => (
             <TeamRoster key={team.id} team={team} />
             ))}
-        </View>
+        </View> */}
 
       {/* View My Team Button */}
-      <TouchableOpacity onPress={() => navigation.navigate("My Team")}>
+      <TouchableOpacity onPress={() => navigation.navigate("MainTabs", { screen: "My Team" })}>
         <Text style={styles.viewMyTeam}>View My Team</Text>
       </TouchableOpacity>
 

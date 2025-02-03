@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
 
-const MyTeamScreen = ({ roster, onDrop, userProfile}) => {
+const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
     
 
     const [selectedPlayer, setSelectedPlayer] = useState(null);
@@ -44,17 +44,17 @@ const MyTeamScreen = ({ roster, onDrop, userProfile}) => {
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => setSelectedPlayer(item)}>
                 <View style={styles.tableRow}>
-                <Text style={styles.cell}>{item.position}</Text>
-                <View style={styles.playerNameContainer}>
-                    <Text style={styles.playerName}>{item.name}</Text>
-                    <View style={styles.tableSmallRow}>
-                        <Text style={styles.teamNameSmall}>{item.team} </Text>
-                        <Text style={styles.teamNameSmall}>Gls:{item.goals} </Text>
-                        <Text style={styles.teamNameSmall}>Ast:{item.assists} </Text>
-                        <Text style={styles.teamNameSmall}>vs:{item.Opponent} </Text>
+                    <Text style={styles.cell}>{item.position}</Text>
+                    <View style={styles.playerNameContainer}>
+                        <Text style={styles.playerName}>{item.name}</Text>
+                        <View style={styles.tableSmallRow}>
+                            <Text style={styles.teamNameSmall}>{item.team} </Text>
+                            <Text style={styles.teamNameSmall}>Gls:{item.goals} </Text>
+                            <Text style={styles.teamNameSmall}>Ast:{item.assists} </Text>
+                            <Text style={styles.teamNameSmall}>vs:{item.Opponent} </Text>
+                        </View>
                     </View>
-                </View>
-                <Text style={styles.datacell}>{item.FantasyPoints}</Text>
+                    <Text style={styles.datacell}>{item.FantasyPoints}</Text>
                 </View>
             </TouchableOpacity>
           )}

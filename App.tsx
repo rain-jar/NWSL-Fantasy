@@ -6,6 +6,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native
 import WelcomeScreen from "./WelcomeScreen";
 import ProfileScreen from "./ProfileScreen";
 import PlayerListScreen from "./PlayerListScreen";
+import LeagueScreen from "./LeagueScreen";
 import ProfileList from "./ProfileList";
 import DraftScreen from "./DraftScreen";
 import MyTeamScreen from "./MyTeamScreen";
@@ -57,16 +58,9 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
       </Tab.Screen>
 
 
-      <Tab.Screen name="Draft">
+      <Tab.Screen name="League">
         {() => (
-          <DraftScreen
-            playerList={availablePlayers}
-            onPick={updatePlayerList}
-            //onNotify={(updateFn) => updateUserRoster(currentUser.id, updateFn)} 
-            currentUser={currentUser}
-            users={users}
-            updateUserRoster={updateUserRoster} 
-          />
+          <LeagueScreen users={users} navigation = {navigation} />
         )}
       </Tab.Screen>
 
@@ -77,6 +71,7 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
               roster={currentUser.roster} 
               onDrop={handleDrop} 
               userProfile={currentUser} 
+              navigation={navigation}
             />
             <TouchableOpacity 
               onPress={() => {
@@ -152,7 +147,19 @@ const App = () => {
             }
           </Stack.Screen>
 
-
+          <Stack.Screen name="Draft">
+            {(navigation) => (
+                <DraftScreen
+                    playerList={availablePlayers}
+                    onPick={(player) => setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name))}
+                    //onNotify={(updateFn) => updateUserRoster(currentUser.id, updateFn)} 
+                    currentUser={currentUser}
+                    users={users}
+                    updateUserRoster={updateUserRoster}
+                   // navigation = {navigation}
+                />
+            )}
+          </Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
