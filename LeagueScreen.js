@@ -29,6 +29,7 @@ const LeagueScreen = ({ users, navigation }) => {
         <Text style={styles.headerCell}>W-L-T</Text>
         <Text style={styles.headerCell}>PF</Text>
       </View>
+      
 
 
       {/* Team List */}
