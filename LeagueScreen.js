@@ -29,7 +29,7 @@ const LeagueScreen = ({ users, navigation }) => {
         <Text style={styles.headerCell}>W-L-T</Text>
         <Text style={styles.headerCell}>PF</Text>
       </View>
-      
+
 
 
       {/* Team List */}
@@ -47,8 +47,8 @@ const LeagueScreen = ({ users, navigation }) => {
                         <Text style={styles.teamName}>{String(item.teamName || "No Team Name")}</Text>
                         <Text style={styles.userName}>@{String(item.userName || "No Team Name")}</Text>
                     </View>
-                    <Text style={styles.cell}>0-0-0</Text>  {/* Placeholder W-L-T */}
-                    <Text style={styles.cell}>0</Text>      {/* Placeholder PF */}
+                    <Text style={styles.cell}>0-0-0</Text>  
+                    <Text style={styles.cell}>0</Text>   
                 </View>
                 </TouchableOpacity>
             </View>
