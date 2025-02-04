@@ -37,6 +37,7 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
           <Text style={styles.headerCell}>Name</Text>
           <Text style={styles.headerdataCell}>Fpts</Text>
         </View>
+        
 
         <FlatList
           data={sortedRoster}
