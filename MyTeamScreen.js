@@ -8,8 +8,8 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
     const [selectedPlayer, setSelectedPlayer] = useState(null);
 
      // Example team data
-    const teamName = userProfile?.teamName;
-    const userName = userProfile?.userName;
+    const teamName = userProfile?.team_name;
+    const userName = userProfile?.user_name;
     console.log(teamName);
     console.log(userName);
 
@@ -31,7 +31,6 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
       </View>
 
 
-      
 
       {/* Team Players Table */}
       <View style={styles.tableContainer}>

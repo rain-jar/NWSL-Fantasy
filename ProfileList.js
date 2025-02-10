@@ -22,7 +22,7 @@ const ProfileList = ({ users, onSelect, navigation }) => {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.userItem} onPress={() => handleSelectUser(item.id)}>
-              <Text style={styles.userName}>{item.userName} ({item.teamName})</Text>
+              <Text style={styles.userName}>{item.user_name} ({item.team_name})</Text>
             </TouchableOpacity>
           )}
         />

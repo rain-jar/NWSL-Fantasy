@@ -12,6 +12,9 @@ import DraftScreen from "./DraftScreen";
 import MyTeamScreen from "./MyTeamScreen";
 import playerData from "./assets/Matchday1Stats.json";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useEffect } from "react";
+import supabase from "./supabaseClient"; 
+
 
 
 const Stack = createStackNavigator();
@@ -34,13 +37,88 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
      setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name));
   };
 
-  const handleDrop = (player) => {
+  const handleDrop = async(player) => {
     //setTeam1Roster((prevRoster) => prevRoster.filter((p) => p.name !== player.name));
+
+      // ** Fetch current roster**
+    const { data, error: fetchError } = await supabase
+      .from("users")
+      .select("roster")
+      .eq("id", currentUser.id)
+      .single(); // Ensures we get only one row
+
+    if (fetchError) {
+      console.error("Error fetching roster:", fetchError);
+      return;
+    }
+
+    const currentRoster = data?.roster || []; 
+    const updatedRoster = currentRoster.filter((p) => p.name !== player.name);
+
+    // Update roster in Supabase
+    const { error: rosterError } = await supabase
+      .from("users")
+      .update({ roster: updatedRoster })
+      .eq("id", currentUser.id);
+
+    if (rosterError) {
+      console.error("Error updating roster:", rosterError);
+      return;
+    }
+
+        // Add player back to availablePlayers in Supabase
+    const { error: playerError } = await supabase
+      .from("players")
+      .insert([player]);
+
+    if (playerError) {
+      console.error("Error adding player back:", playerError);
+     return;
+    }
+
+    updateUserRoster(currentUser.id, (prevRoster) =>prevRoster.filter((p) => p.name !== player.name) );
     setAvailablePlayers((prevPlayers) => [...prevPlayers, player]); // Add back to Player List
   };
   
-  const handleAddPlayer = (player) => {
+  const handleAddPlayer = async(player) => {
+
+    // Remove player from Supabase's players table
+    const { error } = await supabase.from("players").delete().eq("name", player.name);
+
+    if (error) {
+      console.error("Error removing player:", error);
+    }
+
+  // ** Fetch current roster**
+    const { data, error: fetchError } = await supabase
+      .from("users")
+      .select("roster")
+      .eq("id", currentUser.id)
+      .single(); // Ensures we get only one row
+
+    if (fetchError) {
+      console.error("Error fetching roster:", fetchError);
+      return;
+    }
+
+    const currentRoster = data?.roster || []; 
+      // **Append new player**
+    const updatedRoster = [...currentRoster, player];
+
+
+    const { error: rosterError } = await supabase
+      .from("users")
+      .update({ roster: updatedRoster })
+      .eq("id", currentUser.id);
+
+    if (rosterError) {
+      console.error("Error updating roster:", rosterError);
+    }    
+
+
     setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name));
+    updateUserRoster(currentUser.id, (prevRoster) => [...prevRoster, player]);
+
    // setTeam1Roster((prevRoster) => [...prevRoster, player]); // Add player to My Team
   };
 
@@ -94,22 +172,71 @@ const App = () => {
   const [users, setUsers] = useState<{ id: number; teamName: string; userName: string; roster: any[] }[]>([]);; // Store multiple users
   //const [userProfile, setUserProfile] = useState([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [availablePlayers, setAvailablePlayers] = useState([...playerData]);
+  const [availablePlayers, setAvailablePlayers] = useState([]);
 
+    // Fetch players from Supabase on app start
+  const fetchPlayersFromDB = async () => {
+    const { data, error } = await supabase.from("players").select("*");
+    if (error) {
+      console.error("Error fetching players:", error);
+    } else {
+      setAvailablePlayers(data); 
 
-  const addUser = (teamName, userName) => {
-    const newUser = {
-      id: users.length + 1,
-      teamName: teamName,
-      userName: userName,
-      roster: [],
-    };
-    setUsers([...users, newUser]);
-    setCurrentUserId(newUser.id);
-    //console.log("App.tsx back to Profile");
+    }
   };
 
-  const updateUserRoster = (userId, newRoster) => {
+  useEffect(() => {
+    fetchPlayersFromDB();
+  }, []);
+
+  // Function to fetch user data from Supabase
+  const fetchUsersFromDB = async () => {
+    const { data, error } = await supabase.from("users").select("*"); // Fetch all users
+    if (error) {
+      console.error("Error fetching users from Supabase:", error);
+    } else {
+      setUsers(data);
+    }
+  };
+
+    // Fetch users when the app starts
+    useEffect(() => {
+      fetchUsersFromDB();
+    }, []);
+
+
+
+  const addUser = async(teamName, userName) => {
+    const newUser = {
+      team_name: teamName,
+      user_name: userName,
+      roster: [],
+    };
+
+    // Insert new user into Supabase
+    const { data, error } = await supabase.from("users").insert([newUser]).select();
+
+    if (error) {
+      console.error("Error saving user:", error);
+      alert("Failed to save profile. Try again.");
+      return;
+    }else{}
+
+    setUsers([...users, data[0]]);
+    setCurrentUserId(data[0].id);
+
+  };
+
+  const updateUserRoster = async(userId, newRoster) => {
+
+    // Update roster in Supabase
+    const { error } = await supabase.from("users").update({ roster: newRoster }).eq("id", userId);
+
+    if (error) {
+      console.error("Error updating roster:", error);
+      return;
+    }
+
     setUsers((prevUsers) => prevUsers.map((user) => 
       user.id === userId ? { ...user, roster: typeof newRoster === "function" ? newRoster(user.roster) : newRoster } : user
       )

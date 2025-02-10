@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import supabase from "./supabaseClient";
+
+
 
 const ProfileScreen = ({ navigation, onSave }) => {
   const [teamName, setTeamName] = useState("");
   const [userName, setUserName] = useState("");
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     if (!teamName || !userName) {
       alert("Please enter both Team Name and User Name.");
       return;
@@ -13,14 +16,18 @@ const ProfileScreen = ({ navigation, onSave }) => {
     
     profile = [{ tN: teamName, uN: userName}];
     //console.log("Profile to App.tsx");
-    onSave(teamName, userName);
 
-    // Reset navigation to MainTabs with updated profile
-    //console.log("Profile to MainTabs");
+
+    onSave(teamName,userName);
     navigation.reset({
         index: 0,
         routes: [{ name: "MainTabs" }],
-      });
+    });
+
+
+
+    // Reset navigation to MainTabs with updated profile
+    //console.log("Profile to MainTabs");
 
   };
 

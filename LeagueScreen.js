@@ -44,8 +44,8 @@ const LeagueScreen = ({ users, navigation }) => {
                 <TouchableOpacity onPress={() => navigation.navigate("MainTabs", { screen: "My Team" })}>
                 <View style={styles.tableRow}>
                     <View style={styles.teamNameContainer}>
-                        <Text style={styles.teamName}>{String(item.teamName || "No Team Name")}</Text>
-                        <Text style={styles.userName}>@{String(item.userName || "No Team Name")}</Text>
+                        <Text style={styles.teamName}>{String(item.team_name || "No Team Name")}</Text>
+                        <Text style={styles.userName}>@{String(item.user_name || "No Team Name")}</Text>
                     </View>
                     <Text style={styles.cell}>0-0-0</Text>  
                     <Text style={styles.cell}>0</Text>   

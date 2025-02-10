@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import supabase from "./supabaseClient";
 import PlayerRow from "./PlayerRow";
 import TeamRoster from "./TeamRoster";
 import playerData from "./assets/players.json";
@@ -24,7 +25,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 
     const teams = users.map((user) => ({
         id: user.id,
-        name: user.teamName,
+        name: user.team_name,
         roster: user.roster,
       }));
 
@@ -110,7 +111,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 
 // DraftScreen Component
 
-    const handleDraft = (player) => {
+    const handleDraft = async(player) => {
         console.log("Drafting team is "+ currentTeam.name);
 
         if (currentUser.id != currentTeam.id){
@@ -134,8 +135,50 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 
     //    const success = draftPlayer(currentTeam.id, player, playerList, teams);
     //    if (success) {
-            updateUserRoster(currentTeam.id, (prevRoster) => [...prevRoster, { ...player, assignedPosition }]);
 
+                // **Fetch current roster**
+            const { data, error: fetchError } = await supabase
+            .from("users")
+            .select("roster")
+            .eq("id", currentTeam.id)
+            .single(); // Ensures we get only one row
+
+            if (fetchError) {
+            console.error("Error fetching roster:", fetchError);
+            return;
+            }
+            const currentRoster = data?.roster || []; 
+              // ** Append new player**
+            const updatedRoster = [...currentRoster, player];
+
+            const { error } = await supabase
+            .from("users")
+            .update({ roster: updatedRoster })
+            .eq("id", currentTeam.id);
+            console.log(`${currentTeam.id} drafted ${player.name}`);
+
+            if (error) {
+                console.error("Error updating roster:", error);
+                alert("Failed to update roster. Try again.");
+                return;
+            }else{
+                console.log("Roster updated successfully in Supabase!");
+            }
+            
+            // Remove player from availablePlayers in Supabase
+            const { error: playerError } = await supabase
+            .from("players")
+            .delete()
+            .eq("name", player.name);
+            console.log("Player:"+player+"is removed from players table in Supabase")
+
+            if (playerError) {
+            console.error("Error removing player from available players:", playerError);
+            return;
+            }
+
+
+            updateUserRoster(currentTeam.id, (prevRoster) => [...prevRoster, { ...player, assignedPosition }]);
             setPlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
             console.log(`${team.name} drafted ${player.name} as ${assignedPosition}`);
 
@@ -189,7 +232,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
         <Modal visible={!!draftTurn} transparent animationType="slide">
             <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-                <Text style={styles.modalText}>User Team is: {currentUser?.teamName}</Text>
+                <Text style={styles.modalText}>User Team is: {currentUser?.team_name}</Text>
                 <Text style={styles.modalText}>Draft Turn is for: {currentTeam?.name}</Text>
                 <Text style={styles.modalText}>It's not your turn</Text>
 
@@ -202,10 +245,6 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
             </View>
             </View>
         </Modal>
-
-
-
-
     </View>
   );
 };
