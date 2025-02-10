@@ -14,6 +14,8 @@ import playerData from "./assets/Matchday1Stats.json";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useEffect } from "react";
 import supabase from "./supabaseClient"; 
+import { subscribeToUserAndPlayerUpdates } from "./supabaseListeners";
+
 
 
 
@@ -174,6 +176,17 @@ const App = () => {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [availablePlayers, setAvailablePlayers] = useState([]);
 
+  useEffect(() => {
+    console.log("Users updated:", users); // Check if state updates when listener fires
+  }, [users]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToUserAndPlayerUpdates();
+    supabase.getChannels().forEach(channel => console.log("Active channel:", channel));
+    return () => unsubscribe(); // Cleanup
+  }, []);
+
+
     // Fetch players from Supabase on app start
   const fetchPlayersFromDB = async () => {
     const { data, error } = await supabase.from("players").select("*");
@@ -204,7 +217,7 @@ const App = () => {
       fetchUsersFromDB();
     }, []);
 
-
+    
 
   const addUser = async(teamName, userName) => {
     const newUser = {

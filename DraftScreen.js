@@ -6,6 +6,8 @@ import supabase from "./supabaseClient";
 import PlayerRow from "./PlayerRow";
 import TeamRoster from "./TeamRoster";
 import playerData from "./assets/players.json";
+import { subscribeToDraftUpdates } from "./supabaseListeners";
+
 
 
 /*
@@ -26,13 +28,18 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
     const [currentRound, setCurrentRound] = useState(1);
     const [currentPick, setCurrentPick] = useState(0);
     const [draftOrder, setDraftOrder] = useState([users]);
+
+    useEffect(() => {
+        const unsubscribe = subscribeToDraftUpdates();
+        return () => unsubscribe();
+    }, []);
+
     
     const teams = users.map((user) => ({
         id: user.id,
         name: user.team_name,
         roster: user.roster,
       }));
-
 
       
     // Fetch draft state from Supabase
@@ -188,7 +195,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 // DraftScreen Component
 
     const handleDraft = async(player) => {
-        console.log("Drafting team is "+ draftOrder[currentPick].name);
+        console.log("Drafting team is "+ draftOrder[currentPick].team_name);
 
         if (currentUser.id != draftOrder[currentPick].id){
             console.log ("It's not the current user's turn");
@@ -246,7 +253,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
             .from("players")
             .delete()
             .eq("name", player.name);
-            console.log("Player:"+player+"is removed from players table in Supabase")
+            console.log("Player:"+player.name+"is removed from players table in Supabase")
 
             if (playerError) {
             console.error("Error removing player from available players:", playerError);
@@ -286,7 +293,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
           <PlayerRow player={item} onDraft={() => {
-            console.log("Current User is " + currentUser.teamName);
+            console.log("Current User is " + currentUser.team_name);
             handleDraft(item);}} />
         )}
       />
