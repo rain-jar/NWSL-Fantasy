@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useEffect } from "react";
 import supabase from "./supabaseClient";
 import PlayerRow from "./PlayerRow";
 import TeamRoster from "./TeamRoster";
 import playerData from "./assets/players.json";
 
 
-
+/*
 let currentRound = 1;
 let currentPick = 0;
 let draftOrder = []; // Initialize draft order
-
+*/
 
 
 const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster }) => {
@@ -21,17 +22,57 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
     const [players, setPlayers] = useState(playerList);
     const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
     const [draftTurn, setdraftTurn] = useState(false);
+    const [draftStateId, setDraftStateId] = useState(null);
+    const [currentRound, setCurrentRound] = useState(1);
+    const [currentPick, setCurrentPick] = useState(0);
+    const [draftOrder, setDraftOrder] = useState([users]);
     
-
     const teams = users.map((user) => ({
         id: user.id,
         name: user.team_name,
         roster: user.roster,
       }));
 
+
+      
+    // Fetch draft state from Supabase
+    const fetchDraftState = async () => {
+        const { data, error } = await supabase.from("draft_state").select("*").single();
+    
+        if (error || !data) {
+         console.error("Error fetching draft state:", error);
+         const { data: newData, error: insertError } = await supabase
+                .from("draft_state")
+                .insert([{ current_round: 1, current_pick: 0, draft_order: users }])
+                .select()
+                .single();
+
+            if (insertError) {
+                console.error("Error initializing draft state:", insertError);
+                return;
+            }
+            setDraftStateId(newData.id);
+            setCurrentRound(newData.current_round);
+            setCurrentPick(newData.current_pick);
+            setDraftOrder(newData.draft_order);
+
+        } else {
+        setDraftStateId(data.id);
+        setCurrentRound(data.current_round);
+        setCurrentPick(data.current_pick);
+        setDraftOrder(data.draft_order || [...teams]); // Default to teams if empty
+        }
+    };        
+
+    useEffect(() => {
+        fetchDraftState();
+      }, []);
+/*
     if(currentRound === 1 && currentPick === 0){
         draftOrder = [...teams]; // Set it once and for all 
     }
+        */
+
 
 // Position Constraints
     const maxPlayersPerTeam = 11;
@@ -43,7 +84,41 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 
 
 // Helper Functions
-    const nextTurn = () => {
+    const nextTurn = async() => {
+        let newPick = currentPick;
+        let newRound = currentRound;
+        let newDraftOrder = [...draftOrder];
+
+        if (newPick < newDraftOrder.length - 1) {
+            newPick++;
+          } else {
+            newRound++;
+            newDraftOrder.reverse(); // Reverse for snake draft
+            newPick = 0;
+          }
+        
+          // Update local state
+          setCurrentPick(newPick);
+          setCurrentRound(newRound);
+          setDraftOrder(newDraftOrder);
+        
+          if (!draftStateId) return;
+
+          // Save draft state to Supabase
+          const { error } = await supabase
+            .from("draft_state")
+            .update({
+              current_round: newRound,
+              current_pick: newPick,
+              draft_order: newDraftOrder
+            })
+            .eq("id", draftStateId); // Replace with actual draft state row ID
+        
+          if (error) {
+            console.error("Error updating draft state:", error);
+          }
+
+/*
         console.log('came to update after pick'+currentPick+' and draft size is'+draftOrder.length);
         if (currentPick < draftOrder.length - 1) {
             currentPick++;
@@ -54,6 +129,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
             currentPick = 0;
             console.log("Pick order has reversed. Current Pick is " + currentPick);
         }
+        */
     }
 
     const isValidPick = (team, player) => {
@@ -112,14 +188,14 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 // DraftScreen Component
 
     const handleDraft = async(player) => {
-        console.log("Drafting team is "+ currentTeam.name);
+        console.log("Drafting team is "+ draftOrder[currentPick].name);
 
-        if (currentUser.id != currentTeam.id){
+        if (currentUser.id != draftOrder[currentPick].id){
             console.log ("It's not the current user's turn");
             setdraftTurn(true);
             return false;
         }
-        const team = teams.find(t => t.id === currentTeam.id);
+        const team = teams.find(t => t.id === draftOrder[currentPick].id);
 
         if (!team || !playerList.includes(player) || !isValidPick(team, player)) {
             console.log(`Invalid pick: ${player.name}`);
@@ -140,7 +216,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
             const { data, error: fetchError } = await supabase
             .from("users")
             .select("roster")
-            .eq("id", currentTeam.id)
+            .eq("id", draftOrder[currentPick].id)
             .single(); // Ensures we get only one row
 
             if (fetchError) {
@@ -154,8 +230,8 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
             const { error } = await supabase
             .from("users")
             .update({ roster: updatedRoster })
-            .eq("id", currentTeam.id);
-            console.log(`${currentTeam.id} drafted ${player.name}`);
+            .eq("id", draftOrder[currentPick].id);
+            console.log(`${draftOrder[currentPick].id} drafted ${player.name}`);
 
             if (error) {
                 console.error("Error updating roster:", error);
@@ -178,9 +254,9 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
             }
 
 
-            updateUserRoster(currentTeam.id, (prevRoster) => [...prevRoster, { ...player, assignedPosition }]);
+            updateUserRoster(draftOrder[currentPick].id, (prevRoster) => [...prevRoster, { ...player, assignedPosition }]);
             setPlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
-            console.log(`${team.name} drafted ${player.name} as ${assignedPosition}`);
+            console.log(`${draftOrder[currentPick].name} drafted ${player.name} as ${assignedPosition}`);
 
 
         //setPlayers([...playerList]); // Update available players
@@ -200,7 +276,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
     <View style={styles.container}>
       <Text style={styles.title}>Snake Draft</Text>
       <Text style={styles.currentTeam}>
-        {currentTeam.name}'s Turn - Round {currentRound}
+        {draftOrder[currentPick].team_name}'s Turn - Round {currentRound}
          Player's left: {players.length}
       </Text>
 
