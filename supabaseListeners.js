@@ -57,6 +57,7 @@ export const subscribeToUserAndPlayerUpdates = (setUsers, setAvailablePlayers) =
                     console.log("✅ Drafted or Added players:", JSON.stringify(draftedPlayers));
                     console.log("❌ Dropped players:", JSON.stringify(droppedPlayers));
 
+                    
 
                     setAvailablePlayers((prevPlayers) => {
                         let updatedPlayers = [...prevPlayers];
