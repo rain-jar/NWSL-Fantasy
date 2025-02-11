@@ -10,8 +10,8 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
      // Example team data
     const teamName = userProfile?.team_name;
     const userName = userProfile?.user_name;
-    console.log(teamName);
-    console.log(userName);
+    //console.log(teamName);
+    //console.log(userName);
 
 
     const positionOrder = { GK: 1, DF: 2, MF: 3, FW: 4 };

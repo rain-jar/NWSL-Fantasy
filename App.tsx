@@ -176,12 +176,9 @@ const App = () => {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [availablePlayers, setAvailablePlayers] = useState([]);
 
-  useEffect(() => {
-    console.log("Users updated:", users); // Check if state updates when listener fires
-  }, [users]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToUserAndPlayerUpdates();
+    const unsubscribe = subscribeToUserAndPlayerUpdates(setUsers, setAvailablePlayers);
     supabase.getChannels().forEach(channel => console.log("Active channel:", channel));
     return () => unsubscribe(); // Cleanup
   }, []);
@@ -217,6 +214,10 @@ const App = () => {
       fetchUsersFromDB();
     }, []);
 
+
+    useEffect(() => {
+      console.log("Users updated:", users); // Check if state updates when listener fires
+    }, [users]);
     
 
   const addUser = async(teamName, userName) => {
@@ -258,8 +259,10 @@ const App = () => {
     //console.log(temp.teamName);
 
   };
-
-  const currentUser = users.find((user) => user.id === currentUserId);
+  const temp = users?.find((user) => user.id === currentUserId) || null;
+  console.log("curret User Id is: ", temp?.team_name);
+  const currentUser = users?.find((user) => user.id === currentUserId) || null;
+  console.log("User after check: ", currentUser?.user_name)
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -290,7 +293,8 @@ const App = () => {
           <Stack.Screen name="Draft">
             {(navigation) => (
                 <DraftScreen
-                    playerList={availablePlayers}
+                    availablePlayers={availablePlayers}
+                    setAvailablePlayers={setAvailablePlayers}
                     onPick={(player) => setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name))}
                     //onNotify={(updateFn) => updateUserRoster(currentUser.id, updateFn)} 
                     currentUser={currentUser}

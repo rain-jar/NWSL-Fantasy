@@ -17,20 +17,21 @@ let draftOrder = []; // Initialize draft order
 */
 
 
-const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster }) => {
+const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUser, users, updateUserRoster }) => {
 
     const navigation = useNavigation();
 
-    const [players, setPlayers] = useState(playerList);
+    //const [players, setPlayers] = useState(playerList);
     const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
     const [draftTurn, setdraftTurn] = useState(false);
     const [draftStateId, setDraftStateId] = useState(null);
     const [currentRound, setCurrentRound] = useState(1);
     const [currentPick, setCurrentPick] = useState(0);
     const [draftOrder, setDraftOrder] = useState([users]);
+    const [isDrafting, setIsDrafting] = useState(false); 
 
     useEffect(() => {
-        const unsubscribe = subscribeToDraftUpdates();
+        const unsubscribe = subscribeToDraftUpdates(setCurrentRound, setCurrentPick, setDraftOrder);
         return () => unsubscribe();
     }, []);
 
@@ -148,13 +149,13 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
         };
 
         // Position constraints
-        if (player.position.includes("GK") && positionCount.GK >= maxPositions.GK) return false;
-        if (team.roster.length >= maxPlayersPerTeam) return false;
+        if (player.position.includes("GK") && positionCount.GK >= maxPositions.GK) {console.log("Already has a GK"); return false;}
+        if (team.roster.length >= maxPlayersPerTeam) {console.log("No Spots Left"); return false;}
 
         if (team.roster.length < maxPlayersPerTeam) {
             const playerPositions = player.position.split("-");
             const canFit = playerPositions.some(pos => positionCount[pos] < maxPositions[pos]);
-            if (!canFit) return false;
+            if (!canFit) {console.log("Player Position already filled"); return false;}
         }
 
             // **Min Position Check**: If the team is reaching 11 players, ensure all min requirements are met
@@ -195,17 +196,22 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 // DraftScreen Component
 
     const handleDraft = async(player) => {
+        if (isDrafting) return; // Prevent duplicate drafts
+        setIsDrafting(true);
+
         console.log("Drafting team is "+ draftOrder[currentPick].team_name);
 
         if (currentUser.id != draftOrder[currentPick].id){
             console.log ("It's not the current user's turn");
             setdraftTurn(true);
+            setIsDrafting(false);
             return false;
         }
         const team = teams.find(t => t.id === draftOrder[currentPick].id);
 
-        if (!team || !playerList.includes(player) || !isValidPick(team, player)) {
+        if (!team || !availablePlayers.includes(player) || !isValidPick(team, player)) {
             console.log(`Invalid pick: ${player.name}`);
+            setIsDrafting(false);
             return false;
         }
 
@@ -228,6 +234,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 
             if (fetchError) {
             console.error("Error fetching roster:", fetchError);
+            setIsDrafting(false);
             return;
             }
             const currentRoster = data?.roster || []; 
@@ -242,6 +249,7 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
 
             if (error) {
                 console.error("Error updating roster:", error);
+                setIsDrafting(false);
                 alert("Failed to update roster. Try again.");
                 return;
             }else{
@@ -253,17 +261,19 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
             .from("players")
             .delete()
             .eq("name", player.name);
-            console.log("Player:"+player.name+"is removed from players table in Supabase")
+            console.log("Player: "+player.name+" is removed from players table in Supabase")
 
             if (playerError) {
             console.error("Error removing player from available players:", playerError);
+            setIsDrafting(false);
             return;
             }
 
 
-            updateUserRoster(draftOrder[currentPick].id, (prevRoster) => [...prevRoster, { ...player, assignedPosition }]);
-            setPlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
-            console.log(`${draftOrder[currentPick].name} drafted ${player.name} as ${assignedPosition}`);
+            //updateUserRoster(draftOrder[currentPick].id, (prevRoster) => [...prevRoster, { ...player, assignedPosition }]);
+            //setPlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
+            //setAvailablePlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
+            console.log(`${draftOrder[currentPick].team_name} drafted ${player.name} as ${assignedPosition}`);
 
 
         //setPlayers([...playerList]); // Update available players
@@ -272,9 +282,10 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
             //onNotify((prevRoster) => [...prevRoster, player]); // Notify App about Team 1's updated roster
         // }
             nextTurn();
-            console.log('current Team is ' + draftOrder[currentPick].name);
-            setCurrentTeam(draftOrder[currentPick]); // Update current team
+            console.log('current Team is ' + draftOrder[currentPick].team_name);
+           // setCurrentTeam(draftOrder[currentPick]); // Update current team
             onPick(player);
+            setIsDrafting(false);
     //    }
     };
 
@@ -284,15 +295,15 @@ const DraftScreen = ({ playerList, onPick, currentUser, users, updateUserRoster 
       <Text style={styles.title}>Snake Draft</Text>
       <Text style={styles.currentTeam}>
         {draftOrder[currentPick].team_name}'s Turn - Round {currentRound}
-         Player's left: {players.length}
+         Player's left: {availablePlayers.length}
       </Text>
 
       {/* Player List */}
       <FlatList
-        data={players}
+        data={availablePlayers}
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <PlayerRow player={item} onDraft={() => {
+          <PlayerRow player={item} isDrafting={isDrafting} onDraft={() => {
             console.log("Current User is " + currentUser.team_name);
             handleDraft(item);}} />
         )}

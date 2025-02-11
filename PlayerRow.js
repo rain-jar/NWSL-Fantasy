@@ -1,15 +1,15 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const PlayerRow = ({ player, onDraft }) => (
+const PlayerRow = ({ player, isDrafting, onDraft }) => (
   <View style={styles.playerRow}>
     <Text style={styles.playerText}>
       {player.name} ({player.position})
     </Text>
-    <TouchableOpacity style={styles.draftButton} onPress={() => onDraft(player)}>
+    <TouchableOpacity onPress={() => onDraft(player)} disabled={isDrafting} style={isDrafting ? styles.disabledButton : styles.draftButton}>
       <Text style={styles.draftButtonText}>Draft</Text>
     </TouchableOpacity>
-  </View>
+  </View> 
 );
 
 const styles = StyleSheet.create({
@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
     borderRadius: 8
   },
   playerText: { color: "#fff", fontSize: 16 },
+  disabledButton: { backgroundColor: "#999", padding: 10, borderRadius: 8 },
   draftButton: {
     backgroundColor: "#4CAF50",
     paddingVertical: 5,
