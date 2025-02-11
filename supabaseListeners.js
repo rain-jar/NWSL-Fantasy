@@ -37,19 +37,26 @@ export const subscribeToUserAndPlayerUpdates = (setUsers, setAvailablePlayers) =
               // **Check if the roster has changed**
               const existingUser = prevUsers.find((user) => user.id === payload.new.id);
               console.log("Existing user roster :", existingUser.roster);
-              
+
               if (JSON.stringify(existingUser.roster) !== JSON.stringify(payload.new.roster)) {
                     console.log("🔄 Updating roster for user:", payload.new.id);
 
                     const oldRoster = existingUser.roster || [];
                     const newRoster = payload.new.roster || [];
                 
-                    // **Find drafted players (added to roster)**
+                    // **Find drafted or added players (added to roster)**
                     const draftedPlayers = newRoster.filter((player) =>
                     !oldRoster.some((p) => p.name === player.name)
                     );
 
-                    console.log("✅ Drafted players:", JSON.stringify(draftedPlayers));
+                    // **Find dropped players (removed from roster)**
+                    const droppedPlayers = oldRoster.filter((player) =>
+                        !newRoster.some((p) => p.name === player.name)
+                    );                   
+
+                    console.log("✅ Drafted or Added players:", JSON.stringify(draftedPlayers));
+                    console.log("❌ Dropped players:", JSON.stringify(droppedPlayers));
+
 
                     setAvailablePlayers((prevPlayers) => {
                         let updatedPlayers = [...prevPlayers];
@@ -57,7 +64,15 @@ export const subscribeToUserAndPlayerUpdates = (setUsers, setAvailablePlayers) =
                         // Remove drafted players
                         draftedPlayers.forEach((player) => {
                         updatedPlayers = updatedPlayers.filter((p) => p.name !== player.name);
-                        });           
+                        });    
+                        
+                        // Add dropped players only if they are not already in the list
+                        droppedPlayers.forEach((player) => {
+                            if (!updatedPlayers.some((p) => p.name === player.name)) {
+                            console.log("Pushing :",player.name);
+                            updatedPlayers.push(player);
+                            }
+                        });
 
                         console.log("Updated Players : ", updatedPlayers);
                         return updatedPlayers;
@@ -95,7 +110,11 @@ export const subscribeToUserAndPlayerUpdates = (setUsers, setAvailablePlayers) =
 
         setAvailablePlayers((prevPlayers) => {  
             console.log("✅ Adding dropped player back:", payload.new.name);
-            return [...prevPlayers, payload.new]; // Append new player to list
+            if (!prevPlayers.some((p) => p.name === payload.new.name)) {
+                console.log("Appending ", payload.new.name);
+                return [...prevPlayers, payload.new]; // Append only if not present
+            }
+            return prevPlayers;
           });
       })
       .subscribe();

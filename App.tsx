@@ -25,7 +25,8 @@ const Tab = createMaterialTopTabNavigator();
 
 function MainTabs( { navigation, currentUser, users, updateUserRoster, availablePlayers, setAvailablePlayers } ) {
 
-  //console.log("In Main Tabs");
+  console.log("In Main Tabs");
+  console.log(availablePlayers);
 
   const [team1Roster, setTeam1Roster] = useState([]); // State for drafted players
   const userProfile = {
@@ -58,6 +59,7 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
     const updatedRoster = currentRoster.filter((p) => p.name !== player.name);
 
     // Update roster in Supabase
+    console.log("🔍 Before updating availablePlayers:", availablePlayers);
     const { error: rosterError } = await supabase
       .from("users")
       .update({ roster: updatedRoster })
@@ -69,6 +71,7 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
     }
 
         // Add player back to availablePlayers in Supabase
+    console.log("🔍 Before inserting playerList:", availablePlayers);
     const { error: playerError } = await supabase
       .from("players")
       .insert([player]);
@@ -78,8 +81,8 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
      return;
     }
 
-    updateUserRoster(currentUser.id, (prevRoster) =>prevRoster.filter((p) => p.name !== player.name) );
-    setAvailablePlayers((prevPlayers) => [...prevPlayers, player]); // Add back to Player List
+   // updateUserRoster(currentUser.id, (prevRoster) =>prevRoster.filter((p) => p.name !== player.name) );
+   // setAvailablePlayers((prevPlayers) => [...prevPlayers, player]); // Add back to Player List
   };
   
   const handleAddPlayer = async(player) => {
@@ -117,9 +120,16 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
       console.error("Error updating roster:", rosterError);
     }    
 
+    // Remove player from availablePlayers in Supabase
+    const { error: playerError } = await supabase
+    .from("players")
+    .delete()
+    .eq("name", player.name);
+    console.log("Player: "+player.name+" is removed from players table in Supabase")
 
-    setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name));
-    updateUserRoster(currentUser.id, (prevRoster) => [...prevRoster, player]);
+
+   // setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name));
+   // updateUserRoster(currentUser.id, (prevRoster) => [...prevRoster, player]);
 
    // setTeam1Roster((prevRoster) => [...prevRoster, player]); // Add player to My Team
   };
@@ -263,6 +273,7 @@ const App = () => {
   console.log("curret User Id is: ", temp?.team_name);
   const currentUser = users?.find((user) => user.id === currentUserId) || null;
   console.log("User after check: ", currentUser?.user_name)
+  console.log("Available Players in App.tsx: ", availablePlayers);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
