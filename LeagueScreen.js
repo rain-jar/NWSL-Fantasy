@@ -3,9 +3,17 @@ import MyTeamScreen from "./MyTeamScreen";
 import { View, Text, FlatList,  TouchableOpacity, StyleSheet } from "react-native";
 
 
-const LeagueScreen = ({ users, navigation }) => {
-   // console.log("LeagueScreen navigation prop:", navigation);
-   // console.log("Available Screens:", navigation.getState().routes);
+const LeagueScreen = ({ users, navigation, currentUser }) => {
+
+    const handleTeamClick = (team) => {
+        if (team.id === currentUser.id) {
+          // If it's the current user's team, navigate to My Team tab
+          navigation.navigate("MainTabs", { screen: "My Team" });
+        } else {
+          // If it's another user's team, navigate to TeamViewScreen
+          navigation.navigate("TeamView", { team });
+        }
+    };
 
 
   return (
@@ -41,7 +49,7 @@ const LeagueScreen = ({ users, navigation }) => {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View>
-                <TouchableOpacity onPress={() => navigation.navigate("MainTabs", { screen: "My Team" })}>
+                <TouchableOpacity onPress={() => handleTeamClick(item)}>
                 <View style={styles.tableRow}>
                     <View style={styles.teamNameContainer}>
                         <Text style={styles.teamName}>{String(item.team_name || "No Team Name")}</Text>

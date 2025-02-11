@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useEffect } from "react";
 import supabase from "./supabaseClient"; 
 import { subscribeToUserAndPlayerUpdates } from "./supabaseListeners";
+import TeamViewScreen from "./TeamViewScreen";
 
 
 
@@ -150,7 +151,7 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
 
       <Tab.Screen name="League">
         {() => (
-          <LeagueScreen users={users} navigation = {navigation} />
+          <LeagueScreen users={users} navigation = {navigation} currentUser={currentUser}/>
         )}
       </Tab.Screen>
 
@@ -300,6 +301,12 @@ const App = () => {
               )
             }
           </Stack.Screen>
+
+          <Stack.Screen name="TeamView" component={TeamViewScreen} />
+
+          
+
+
 
           <Stack.Screen name="Draft">
             {(navigation) => (
