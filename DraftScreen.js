@@ -63,17 +63,23 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
             setCurrentRound(newData.current_round);
             setCurrentPick(newData.current_pick);
             setDraftOrder(newData.draft_order);
+            console.log("Draft State is fetch for the first time")
+            console.log("Draft is : Current Pick: ",newData.currentPick, " CurrentRound: ", newData.currentRound)
+            console.log("Whereas App Draft State is : Current Pick: ",currentPick, " CurrentRound: ", currentRound)
 
         } else {
         setDraftStateId(data.id);
         setCurrentRound(data.current_round);
         setCurrentPick(data.current_pick);
-        setDraftOrder(data.draft_order || [...teams]); // Default to teams if empty
+        setDraftOrder(data.draft_order); // Default to teams if empty
+        console.log("Fetch State on App.tsx render. Current pick: ", data.current_pick, " Current Round: ", data.current_round)
         }
     };        
 
     useEffect(() => {
         fetchDraftState();
+        console.log("App.tsx fetches draft state - currentPick: ",currentPick," currentRound: ",currentRound)
+
       }, []);
 /*
     if(currentRound === 1 && currentPick === 0){
@@ -93,6 +99,7 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
 
 // Helper Functions
     const nextTurn = async() => {
+        console.log("currentPick: ",currentPick," currentRound: ",currentRound)
         let newPick = currentPick;
         let newRound = currentRound;
         let newDraftOrder = [...draftOrder];
@@ -109,6 +116,7 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
           setCurrentPick(newPick);
           setCurrentRound(newRound);
           setDraftOrder(newDraftOrder);
+          console.log("currentPick: ",newPick," currentRound: ",newRound)
         
           if (!draftStateId) return;
 
@@ -256,15 +264,15 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
                 console.log("Roster updated successfully in Supabase!");
             }
             
-            // Remove player from availablePlayers in Supabase
+            // Update Player Status in availablePlayers in Supabase
             const { error: playerError } = await supabase
-            .from("players")
-            .delete()
+            .from("players_base")
+            .update({ onroster: true })
             .eq("name", player.name);
-            console.log("Player: "+player.name+" is removed from players table in Supabase")
+            console.log("Player: "+player.name+"'s onRoster status is true in the players table in Supabase")
 
             if (playerError) {
-            console.error("Error removing player from available players:", playerError);
+            console.error("Error updating player from available players:", playerError);
             setIsDrafting(false);
             return;
             }

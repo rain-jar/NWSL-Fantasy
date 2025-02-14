@@ -11,6 +11,7 @@ fi
 cd "$(dirname "$0")"
 
 # Step 1: Clean dependencies
+npm cache clean --force 
 rm -rf node_modules package-lock.json yarn.lock android/app/build android/.gradle android/app/src/main/assets/index.android.bundle
 
 # Step 2: Reinstall dependencies

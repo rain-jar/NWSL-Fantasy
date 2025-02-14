@@ -57,7 +57,29 @@ export const subscribeToUserAndPlayerUpdates = (setUsers, setAvailablePlayers) =
                     console.log("✅ Drafted or Added players:", JSON.stringify(draftedPlayers));
                     console.log("❌ Dropped players:", JSON.stringify(droppedPlayers));
 
-                  
+                    
+
+                    setAvailablePlayers((prevPlayers) => {
+                        let updatedPlayers = [...prevPlayers];
+                
+                        // Remove drafted players
+                        draftedPlayers.forEach((player) => {
+                        updatedPlayers = updatedPlayers.filter((p) => p.name !== player.name);
+                        });    
+                        
+                        // Add dropped players only if they are not already in the list
+                        droppedPlayers.forEach((player) => {
+                            if (!updatedPlayers.some((p) => p.name === player.name)) {
+                            console.log("Pushing :",player.name);
+                            updatedPlayers.push(player);
+                            }
+                        });
+
+                        console.log("Updated Players : ", updatedPlayers);
+                        return updatedPlayers;
+                    });
+
+                
                     console.log("🔄 Updating roster for user:", payload.new.id);
                     return prevUsers.map((user) =>
                     user.id === payload.new.id ? { ...user, roster: payload.new.roster } : user);
@@ -78,29 +100,15 @@ export const subscribeToUserAndPlayerUpdates = (setUsers, setAvailablePlayers) =
   
     const playerSubscription = supabase
       .channel("players_changes")
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "players_base" }, async(payload) => {
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "players" }, async(payload) => {
         console.log("🔍 Incoming payload:", JSON.stringify(payload.old));
         console.log("Player:", payload.id," is already removed while updating team")
 
       })
 
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "players_base" }, async(payload) => {
-        console.log("Inside UpdateListener" );
-
-        const { data, error } = await supabase
-        .from("players_base")
-        .select("*")
-        .eq("onroster", false); // Fetch only players NOT on a team
-
-        if (!error) {
-          setAvailablePlayers(data); // Populate state dynamically
-          const droppedPlayer = data.find((p) => p.name === payload.new.name)
-          if(droppedPlayer)
-             console.log("Dropped Player:", droppedPlayer.name,"'s status is already updated while updated to: ", droppedPlayer.onroster)
-          else
-           console.log("Check deeper")
-        }
-        
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "players" }, async(payload) => {
+        console.log("🔍 Incoming payload:", JSON.stringify(payload.old));
+        console.log("Player:", payload.id," is already updated while updating team")
       })
 
 

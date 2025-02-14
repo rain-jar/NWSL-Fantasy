@@ -74,8 +74,11 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
         // Add player back to availablePlayers in Supabase
     console.log("🔍 Before inserting playerList:", availablePlayers);
     const { error: playerError } = await supabase
-      .from("players")
-      .insert([player]);
+      .from("players_base")
+      .update({ onroster: false })
+      .eq("name", player.name);
+      console.log("Player: "+player.name+"'s onRoster status is false in the players table in Supabase")
+
 
     if (playerError) {
       console.error("Error adding player back:", playerError);
@@ -123,10 +126,10 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
 
     // Remove player from availablePlayers in Supabase
     const { error: playerError } = await supabase
-    .from("players")
-    .delete()
+    .from("players_base")
+    .update({ onroster: true })
     .eq("name", player.name);
-    console.log("Player: "+player.name+" is removed from players table in Supabase")
+    console.log("Player: "+player.name+"'s onRoster status is set to true in Supabase")
 
 
    // setAvailablePlayers((prev) => prev.filter((p) => p.name !== player.name));
@@ -197,10 +200,11 @@ const App = () => {
 
     // Fetch players from Supabase on app start
   const fetchPlayersFromDB = async () => {
-    const { data, error } = await supabase.from("players").select("*");
+    const { data, error } = await supabase.from("players_base").select("*").eq("onroster", false);;
     if (error) {
       console.error("Error fetching players:", error);
     } else {
+      console.log("App.tsx renders and loads sets Available List")
       setAvailablePlayers(data); 
 
     }
@@ -219,6 +223,8 @@ const App = () => {
       setUsers(data);
     }
   };
+
+
 
     // Fetch users when the app starts
     useEffect(() => {
@@ -274,7 +280,7 @@ const App = () => {
   console.log("curret User Id is: ", temp?.team_name);
   const currentUser = users?.find((user) => user.id === currentUserId) || null;
   console.log("User after check: ", currentUser?.user_name)
-  console.log("Available Players in App.tsx: ", availablePlayers);
+//  console.log("Available Players in App.tsx: ", availablePlayers);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

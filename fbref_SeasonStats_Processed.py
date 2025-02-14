@@ -2,7 +2,6 @@ import pandas as pd
 import os
 
 # List of CSV files to combine (Add all team files here)
-csv_files = ["Spirit_match_logs.csv"]  # Update with actual file names
 
 # Define position mappings
 position_mapping = {
@@ -22,15 +21,15 @@ def map_position(position_temp):
 
 
 # Define the column headers to maintain consistency
-columns = ["name", "PositionTemp", "team", "Opponent", "Minutes", "goals", "assists",
+columns = ["name", "team", "PositionTemp", "Minutes", "goals", "assists",
            "PKMissed", "Goals Against", "Saves", "Clean Sheet", "Yellow Cards", 
-           "Red Cards", "Match URL"]
+           "Red Cards", "URL", "ImgURL"]
 
 # Read and combine CSV files
-combined_df = pd.concat([pd.read_csv(file) for file in csv_files], ignore_index=True)
+df = pd.read_csv("season_player_stats.csv")
 
 # Ensure consistent column ordering
-combined_df = combined_df[columns]
+combined_df = df[columns]
 
 combined_df["position"] = combined_df["PositionTemp"].apply(map_position)
 
@@ -39,14 +38,15 @@ combined_df["position"] = combined_df["PositionTemp"].apply(map_position)
 output_file = "Matchday1Stats.csv"
 combined_df.to_csv(output_file, index=False) """
 
-print(f"✅ Matchday1Stats.csv successfully created with {len(combined_df)} rows!")
+#print(f"✅ SeasonStats.csv successfully created with {len(combined_df)} rows!")
 
 # Fantasy Scoring Rules
 def calculate_fantasy_points(row):
     points = 0
     
     # 1. Playing time points
-    minutes = row["Minutes"]
+    #print(type(row["Minutes"]))
+    minutes = int(row["Minutes"].replace(",", "")) if row["Minutes"] else 0
     if minutes >= 60:
         points += 2
     elif minutes > 0:
@@ -67,7 +67,7 @@ def calculate_fantasy_points(row):
     points += row["assists"] * 3
 
     # 4. Clean sheets
-    if row["Clean Sheet"]==0:
+    if row["Clean Sheet"]:
         if "GK" in row["position"] or "DF" in row["position"]:
             points += 4
         elif "MF" in row["position"]:
@@ -94,16 +94,16 @@ def calculate_fantasy_points(row):
 # Apply Fantasy Scoring function
 combined_df["FantasyPoints"] = combined_df.apply(calculate_fantasy_points, axis=1)
 
-output_file = "Matchday1Stats.csv"
+output_file = "SeasonStatsProcessed.csv"
 combined_df.to_csv(output_file, index=False) 
 
 # Convert DataFrame to JSON format
 json_output = combined_df.to_json(orient="records", indent=4)
 
 # Save as JSON file
-json_file_path = "./assets/Matchday1Stats.json"
+json_file_path = "SeasonStatsProcessed.json"
 with open(json_file_path, "w") as json_file:
     json_file.write(json_output)
 
-print(f"✅ Matchday1Stats successfully converted to JSON: {json_file_path}")
+print(f"✅ SeasonStats successfully converted to JSON: {json_file_path}")
 

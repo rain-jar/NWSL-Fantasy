@@ -176,9 +176,9 @@ for index, match_url in enumerate(match_links[:1]):  # Limit to first 5 matches 
 
             gA = goals_against[index]
             if (gA == 0):
-                cleanSheet = True
+                cleanSheet = 1
             else:
-                cleanSheet = False
+                cleanSheet = 0
             
 
             player_data.append({

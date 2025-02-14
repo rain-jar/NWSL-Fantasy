@@ -5,6 +5,7 @@ import { Picker } from "@react-native-picker/picker";
 //import playerDataNew from "./assets/players.json";
 import { ScrollView } from "react-native";
 //import { ScrollView } from "react-native-gesture-handler";
+import supabase from "./supabaseClient";
 
 
 
@@ -17,6 +18,8 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
     const [selectedTeam, setSelectedTeam] = useState("");
     const [sortField, setSortField] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc");
+    const [selectedStatsType, setSelectedStatsType] = useState("season"); // Default to season stats
+    const [playerList, setPlayerList] = useState([]); // Store fetched data
 
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [modalMessage, setModalMessage] = useState("");
@@ -25,11 +28,74 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
   
     useEffect(() => {
       filterAndSortPlayers();
-    }, [searchQuery, selectedPosition, selectedTeam, sortField, sortOrder]);
+    }, [searchQuery, selectedPosition, selectedTeam, sortField, sortOrder, selectedStatsType]);
   
-    const filterAndSortPlayers = () => {
-      let filtered = playerData;
-  
+//   useEffect(() => {
+      const fetchPlayers = async (playerListTemp) => {
+        try{
+          let seasonData, matchData, error1, error2;
+          let query;
+          console.log("starting to fetch players for: ", selectedStatsType);
+          ({ data: seasonData, error: error1 } = await supabase.from("players_base").select("*").eq("onroster", false));   // Fetch Season Stats
+          if (error1) throw new Error("❌ Error fetching season stats: " + error1.message);
+
+          if (selectedStatsType === "season") {
+            setPlayerList(seasonData); 
+            console.log("✅ Season Player List Updated:", seasonData);
+            playerListTemp = seasonData
+            return playerListTemp;
+          } else if (selectedStatsType === "week1") {
+            // Fetch Match Stats
+            ({ data: matchData, error: error2 } = await supabase
+              .from("players")
+              .select("*"));
+            //  .eq("week", 1)); 
+            if (error2) 
+              throw new Error("❌ Error fetching match stats: " + error2.message);
+            else
+              console.log("fetched weekly data: ", matchData);
+
+            // 🔄 **Merge Data: Default to 0s if player has no match data**
+            const mergedPlayers = seasonData.map((player) => {
+              const matchStats = matchData.find((m) => m.id === player.id) || {};
+              return {
+                ...player,
+                goals: matchStats.goals || 0,
+                assists: matchStats.assists || 0,
+                Minutes: matchStats.Minutes || 0,
+                PKMissed: matchStats.PKMissed || 0,
+                "Goals Against": matchStats["Goals Against"] || 0,
+                Saves: matchStats.Saves || 0,
+                "Clean Sheet": matchStats["Clean Sheet"] || 0,
+                "Yellow Cards": matchStats["Yellow Cards"] || 0,
+                "Red Cards": matchStats["Red Cards"] || 0,
+
+                FantasyPoints: matchStats.FantasyPoints || 0,
+              };
+            }); 
+            setPlayerList(mergedPlayers);  
+            console.log("New Player View merged for Weekly data", mergedPlayers);
+            playerListTemp = mergedPlayers
+            return playerListTemp;
+          }
+        } catch (err) {
+          console.error("🔥 Unexpected fetch error:", err);
+        }
+      };
+    
+ //     fetchPlayers();
+ //   }, [selectedStatsType]);
+
+    const filterAndSortPlayers = async() => {
+      console.log("filter is called");
+      let filtered = players;
+
+      if (selectedStatsType)
+        filtered = await fetchPlayers();
+        console.log("playerList is updated in Filter due to Stats Filter", playerList);
+        console.log("filterList is updated in Filter due to Stats Filter", filtered);
+
+
       if (searchQuery) {
         filtered = filtered.filter((player) =>
           player.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -43,7 +109,7 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
       if (selectedTeam) {
         filtered = filtered.filter((player) => player.team === selectedTeam);
       }
-  
+
       filtered.sort((a, b) => {
         let valA = a[sortField];
         let valB = b[sortField];
@@ -56,6 +122,7 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
       });
   
       setPlayers(filtered);
+      console.log("setPlayers called inside Filter");
     };
   
     const toggleSort = (field) => {
@@ -123,22 +190,36 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
         <View style={styles.filterRow}>
           <View style={styles.filterPickerContainer}>
             <Picker selectedValue={selectedPosition} onValueChange={setSelectedPosition} style={styles.filterPicker}>
-              <Picker.Item label="Position" value="" />
-              <Picker.Item label="FW" value="FW" />
-              <Picker.Item label="MF" value="MF" />
-              <Picker.Item label="DF" value="DF" />
-              <Picker.Item label="GK" value="GK" />
+              <Picker.Item style={styles.filterText} label="Position" value="" />
+              <Picker.Item style={styles.filterText} label="FW" value="FW" />
+              <Picker.Item style={styles.filterText} label="MF" value="MF" />
+              <Picker.Item style={styles.filterText} label="DF" value="DF" />
+              <Picker.Item style={styles.filterText} label="GK" value="GK" />
             </Picker>
           </View>
   
           <View style={styles.filterPickerContainer}>
             <Picker selectedValue={selectedTeam} onValueChange={setSelectedTeam} style={styles.filterPicker}>
-              <Picker.Item label="Team" value="" />
-              {[...new Set(playerData.map((p) => p.team))].map((team) => (
-                <Picker.Item key={team} label={team} value={team} />
+              <Picker.Item style={styles.filterText} label="Team" value="" />
+              {[...new Set(players.map((p) => p.team))].map((team) => (
+                <Picker.Item style={styles.filterText} key={team} label={team} value={team} />
               ))}
             </Picker>
           </View>
+
+          <View style={styles.filterPickerContainer}>
+            <Picker
+              selectedValue={selectedStatsType}
+              onValueChange={(value) => {
+                console.log("Changing Stats Filter");
+                setSelectedStatsType(value);}}
+              style={styles.filterPicker}
+            >
+              <Picker.Item style={styles.filterText} label="Last Season(total)" value="season" />
+              <Picker.Item style={styles.filterText} label="Week 1" value="week1" />
+            </Picker>
+          </View>
+
         </View>
 
         {/* Table Header */}
@@ -217,7 +298,7 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
                             <Text style={styles.cell}>{item.Saves}</Text>
                             <Text style={styles.cell}>{item["Yellow Cards"]}</Text>
                             <Text style={styles.cell}>{item["Red Cards"]}</Text> 
-                            <Text style={styles.cell}>{item["Clean Sheet"] ? "Yes" : "No"}</Text>
+                            <Text style={styles.cell}>{item["Clean Sheet"]}</Text>
                         </View>
 
                     )}}
@@ -263,8 +344,9 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
     draftButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
     searchBar: { backgroundColor: "#333", color: "#fff", padding: 10, borderRadius: 8, marginBottom: 12 },
     filterRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12, gap: 15 },
-    filterPickerContainer: { flex: 1, backgroundColor: "#222", borderRadius: 12, paddingHorizontal: 20, height: 50, justifyContent: "center" },
+    filterPickerContainer: { flex: 1, backgroundColor: "#222", borderRadius: 12, paddingHorizontal: 2, height: 50, justifyContent: "center" },
     filterPicker: { color: "#fff", width: "100%" },
+    filterText: { color: "#121212", fontWeight: "bold", fontSize: 14, textAlign: "center" },
     tableHeader: { flexDirection: "row", backgroundColor: "#444", paddingVertical: 10, height: 50, width: 1000},
     headerCell: { flex: 1, textAlign: "center" },
     headerText: { color: "#fff", fontWeight: "bold", fontSize: 14, textAlign: "center" },

@@ -65,7 +65,7 @@ print(match_links[0])
 player_data = []
 gk_data = []
 
-for index, match_url in enumerate(match_links[:1]):  # Limit to first 5 matches for testing
+for index, match_url in enumerate(match_links[:1]):  # Limit to first match for testing
     print(f"Scraping match {index+1}/{len(match_links)}: {match_url}")
 
     driver = webdriver.Chrome()  # Make sure you have chromedriver installed
