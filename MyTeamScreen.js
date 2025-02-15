@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
+import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
 
 const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
     
@@ -36,7 +36,8 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
       <View style={styles.tableContainer}>
         <View style={styles.tableHeader}>
           <Text style={styles.headerCell}>Pos</Text>
-          <Text style={styles.headerCell}>Name</Text>
+          {/*<Text style={styles.headerCell}>Test</Text>*/}
+          <Text style={styles.headerNameCell}>Name</Text>
           <Text style={styles.headerdataCell}>Fpts</Text>
         </View>
 
@@ -49,6 +50,8 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
             <TouchableOpacity onPress={() => setSelectedPlayer(item)}>
                 <View style={styles.tableRow}>
                     <Text style={styles.cell}>{item.position}</Text>
+                    <Image source={require("./assets/placeholder.png")} style={{ width: 40, height: 40, borderRadius: 25}} resizeMode="cover"/>                           
+          
                     <View style={styles.playerNameContainer}>
                         <Text style={styles.playerName}>{item.name}</Text>
                         <View style={styles.tableSmallRow}>
@@ -99,11 +102,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#444",
+    justifyContent:"flex-start",
     paddingBottom: 8,
-    width : "%100"
+    gap: 25,
+   // width : "%100"
   },
-  headerCell: { flex: 1, color: "#fff", fontWeight: "bold", fontSize: 16, textAlign: "left", width : 10 },
-  headerdataCell: { flex: 1, color: "#fff", fontWeight: "bold", fontSize: 16, textAlign: "right", width : 10 },
+  headerCell: { flex: 0.5, color: "#fff", fontWeight: "bold", fontSize: 16 },
+  headerNameCell: { flex: 1.1, color: "#fff", fontWeight: "bold", fontSize: 16 },
+  headerdataCell: { flex: 0.25, color: "#fff", fontWeight: "bold", fontSize: 16},
 
 
   tableRow: {
@@ -111,17 +117,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#333",
     paddingVertical: 10,
-    alignItems: "center",
-    width : "%100"
+    justifyContent:"flex-start",
+    gap: 25,
   },
-  cell: { flex: 1, color: "#fff", fontSize: 16, textAlign: "left", width: 10},
-  datacell: { flex: 1, color: "#fff", fontSize: 16, textAlign: "right", width: 20},
+  cell: { flex: 0.5, color: "#fff", fontSize: 16},
+  datacell: { flex: 1, color: "#fff", fontSize: 16},
 
 
-  playerNameContainer: { flex: 1, justifyContent: "left" },
-  playerName: { color: "#fff", fontSize: 16, textAlign: "left" },
-  tableSmallRow: { flexDirection: "row", alignItems: "left", marginTop: 2},
-  teamNameSmall: { color: "#bbb", fontSize: 14, textAlign: "left", marginTop: 2 },
+  playerNameContainer: { flex: 5 },
+  playerName: { color: "#fff", fontSize: 16},
+  tableSmallRow: { flexDirection: "row", justifyContent:"flex-start", marginTop: 2},
+  teamNameSmall: { color: "#bbb", fontSize: 14, marginTop: 2 },
   modalContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   modalContent: { backgroundColor: "#1E1E1E", padding: 20, borderColor:"#4CAF50", borderRadius: 10, borderWidth: 1,  alignItems: "center" },
   modalText: { color:"#fff",fontSize: 18, fontWeight: "bold", marginBottom: 10, paddingBottom:10 },

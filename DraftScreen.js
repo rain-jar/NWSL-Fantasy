@@ -64,8 +64,8 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
             setCurrentPick(newData.current_pick);
             setDraftOrder(newData.draft_order);
             console.log("Draft State is fetch for the first time")
-            console.log("Draft is : Current Pick: ",newData.currentPick, " CurrentRound: ", newData.currentRound)
-            console.log("Whereas App Draft State is : Current Pick: ",currentPick, " CurrentRound: ", currentRound)
+            console.log("Initial Draft is : Current Pick: ",newData.currentPick, " CurrentRound: ", newData.currentRound)
+            console.log("Whereas Initial App Draft  is : Current Pick: ",currentPick, " CurrentRound: ", currentRound)
 
         } else {
         setDraftStateId(data.id);

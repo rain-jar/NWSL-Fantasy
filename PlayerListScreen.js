@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal, Button } from "react-native";
+import { View, Text, Image, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal, Button } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 //import playerDataNew from "./assets/players.json";
@@ -229,7 +229,7 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
                 <View>
                     <View style={styles.tableHeader}>
                     <Text style={styles.headerText}>        </Text>
-
+                    <Text style={styles.headerText}>            </Text>
                     <TouchableOpacity onPress={() => toggleSort("name")} style={styles.headerCell}>
                         <Text style={styles.headerText}>Name {sortField === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}</Text>
                     </TouchableOpacity>
@@ -286,6 +286,7 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
                             <TouchableOpacity onPress={() => setSelectedPlayer(item)}>
                                 <Text style={styles.addButton}>+</Text>
                             </TouchableOpacity>
+                            <Image source={require("./assets/placeholder.png")} style={{ width: 40, height: 40, borderRadius: 25 }} resizeMode="cover"/>                           
                             <Text style={styles.cell}>{item.name}</Text>
                             <Text style={styles.cell}>{item.team}</Text>
                             <Text style={styles.cell}>{item.position}</Text>
