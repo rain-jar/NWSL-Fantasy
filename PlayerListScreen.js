@@ -27,11 +27,12 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
     const [scrollX, setScrollX] = useState(0); // Track scroll position
   
     useEffect(() => {
-      filterAndSortPlayers();
+      fetchPlayers().then((updatedList) => {
+        filterAndSortPlayers(updatedList); // Pass fetched list for filtering
+      });
     }, [searchQuery, selectedPosition, selectedTeam, sortField, sortOrder, selectedStatsType]);
   
-//   useEffect(() => {
-      const fetchPlayers = async (playerListTemp) => {
+    const fetchPlayers = async (playerListTemp) => {
         try{
           let seasonData, matchData, error1, error2;
           let query;
@@ -69,7 +70,6 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
                 "Clean Sheet": matchStats["Clean Sheet"] || 0,
                 "Yellow Cards": matchStats["Yellow Cards"] || 0,
                 "Red Cards": matchStats["Red Cards"] || 0,
-
                 FantasyPoints: matchStats.FantasyPoints || 0,
               };
             }); 
@@ -81,18 +81,15 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
         } catch (err) {
           console.error("🔥 Unexpected fetch error:", err);
         }
-      };
+    };
     
- //     fetchPlayers();
- //   }, [selectedStatsType]);
-
-    const filterAndSortPlayers = async() => {
+    const filterAndSortPlayers = async(updatedList) => {
       console.log("filter is called");
       let filtered = players;
 
       if (selectedStatsType)
-        filtered = await fetchPlayers();
-        console.log("playerList is updated in Filter due to Stats Filter", playerList);
+        filtered = [...updatedList];
+        console.log("playerList is updated in Filter due to Stats Filter", updatedList);
         console.log("filterList is updated in Filter due to Stats Filter", filtered);
 
 
@@ -121,8 +118,12 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
         return valA < valB ? 1 : -1;
       });
   
-      setPlayers(filtered);
-      console.log("setPlayers called inside Filter");
+      if (JSON.stringify(filtered) !== JSON.stringify(players)) {
+        setPlayers(filtered);
+        console.log("🔄 setPlayers updated inside Player Filter!");
+      } else {
+        console.log("⚡ No change in player data, avoiding re-render.");
+      }
     };
   
     const toggleSort = (field) => {

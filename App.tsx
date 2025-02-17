@@ -148,18 +148,18 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
       }}
     >
       <Tab.Screen name="Players"> 
-        {() => <PlayerListScreen key={availablePlayers.length} playerData={availablePlayers} onAdd={handleAddPlayer} teamRoster={currentUser.roster}/>}
-      </Tab.Screen>
-
-
-      <Tab.Screen name="League">
-        {() => (
-          <LeagueScreen users={users} navigation = {navigation} currentUser={currentUser}/>
-        )}
+        {() => {
+          console.log("Rendering PlayerScreen");
+          return(
+            <PlayerListScreen key={availablePlayers.length} playerData={availablePlayers} onAdd={handleAddPlayer} teamRoster={currentUser.roster}/>
+          );
+        }}
       </Tab.Screen>
 
       <Tab.Screen name="My Team">
-        {() => (
+        {() => {
+          console.log("Rendering My Team", currentUser.roster);
+          return(
           <View style={{ flex: 1 }}>
             <MyTeamScreen 
               roster={currentUser.roster} 
@@ -177,6 +177,13 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
               <Text style={{ color: "#fff", textAlign: "center" }}>Switch User</Text>
             </TouchableOpacity>
           </View>
+        );
+        }}
+      </Tab.Screen>
+
+      <Tab.Screen name="League">
+        {() => (
+          <LeagueScreen users={users} navigation = {navigation} currentUser={currentUser}/>
         )}
       </Tab.Screen>
 

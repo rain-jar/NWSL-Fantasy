@@ -1,11 +1,17 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import supabase from "./supabaseClient";
+
+
 
 const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
     
 
     const [selectedPlayer, setSelectedPlayer] = useState(null);
+    const [selectedStatsType, setSelectedStatsType] = useState("week1");
+    const [currentRoster, setRoster] = useState([...roster]); // Default to season stats
+
 
      // Example team data
     const teamName = userProfile?.team_name;
@@ -13,14 +19,77 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
     //console.log(teamName);
     //console.log(userName);
 
+    useEffect(() => {
+      fetchPlayers();
+    }, [roster, selectedPlayer, selectedStatsType]);
 
-    const positionOrder = { GK: 1, DF: 2, MF: 3, FW: 4 };
 
-    const sortedRoster = [...roster].sort((a, b) => {
-    const posA = a.position.split("-")[0]; // Use first position for hybrid roles
-    const posB = b.position.split("-")[0];
-    return positionOrder[posA] - positionOrder[posB];
-    });
+    const fetchPlayers = async () => {
+      try{
+        let seasonTeamData, matchData, error1, error2;
+        let query;
+        console.log("Start of MyTeam Filter for: ", selectedStatsType);
+        ({ data: seasonTeamData, error: error1 } = await supabase.from("players_base").select("*").eq("onroster", true));   // Fetch Season Stats
+        if (error1) throw new Error("❌ Error fetching season stats: " + error1.message);
+
+        if (selectedStatsType === "season") {
+          console.log("No need to do anything");
+          setRoster(roster);
+          return;
+        } else if (selectedStatsType === "week1") {
+          // Fetch Match Stats
+          ({ data: matchData, error: error2 } = await supabase
+            .from("players")
+            .select("*"));
+          //  .eq("week", 1)); 
+          if (error2) 
+            throw new Error("❌ Error fetching match stats: " + error2.message);
+          else
+            console.log("fetched weekly data: ", matchData);
+            console.log("roster is ", roster);
+
+          const mergedTeamPlayers = seasonTeamData.map((player) => {
+            const matchStats = matchData.find((m) => m.id === player.id) || {};
+            return {
+              ...player,
+              Opponent : matchStats.Opponent || "",
+              goals: matchStats.goals || 0,
+              assists: matchStats.assists || 0,
+              Minutes: matchStats.Minutes || 0,
+              PKMissed: matchStats.PKMissed || 0,
+              "Goals Against": matchStats["Goals Against"] || 0,
+              Saves: matchStats.Saves || 0,
+              "Clean Sheet": matchStats["Clean Sheet"] || 0,
+              "Yellow Cards": matchStats["Yellow Cards"] || 0,
+              "Red Cards": matchStats["Red Cards"] || 0,
+              FantasyPoints: matchStats.FantasyPoints || 0,
+            }
+          });
+
+          // 🔄 **Merge Data: Default to 0s if player has no match data**
+          const currentTeamPlayers = roster.map((player) => {
+            const relevantPlayers = mergedTeamPlayers.find((m) => m.id === player.id) || {};
+            return relevantPlayers
+          })
+          console.log("Players in players table and on this current user roster: ", currentTeamPlayers);
+
+          const positionOrder = { GK: 1, DF: 2, MF: 3, FW: 4 };
+
+          const sortedRoster = [...currentTeamPlayers].sort((a, b) => {
+            console.log("Current roster is :", currentRoster);
+            const posA = a.position.split("-")[0]; // Use first position for hybrid roles
+            const posB = b.position.split("-")[0];
+            return positionOrder[posA] - positionOrder[posB];
+          });
+
+          setRoster(sortedRoster);
+          return;
+        }
+      } catch (err) {
+        console.error("🔥 Unexpected fetch error:", err);
+      }
+    };
+
 
   return (
     <View style={styles.container}>
@@ -30,6 +99,19 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
         <Text style={styles.username}>@{userName || "No Team Name"}</Text>
       </View>
 
+      {/* Filters Row */}
+      <View style={styles.filterRow}>
+        <View style={styles.filterPickerContainer}>
+          <Picker selectedValue={selectedStatsType} 
+            onValueChange={(value) => {
+            console.log("Changing MyTeam Stats Filter");
+            setSelectedStatsType(value);}}
+            style={styles.filterPicker}>
+              <Picker.Item style={styles.filterText} label="Last Season(total)" value="season" />
+              <Picker.Item style={styles.filterText} label="Week 1" value="week1" />
+          </Picker>
+        </View>
+      </View>
 
 
       {/* Team Players Table */}
@@ -44,7 +126,7 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
 
 
         <FlatList
-          data={sortedRoster}
+          data={currentRoster}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => setSelectedPlayer(item)}>
@@ -97,6 +179,11 @@ const styles = StyleSheet.create({
   teamName: { color: "#fff", fontSize: 24, fontWeight: "bold", textAlign: "left" },
   username: { color: "#bbb", fontSize: 16, textAlign: "left", marginTop: 4 },
 
+  filterRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12, gap: 15 },
+  filterPickerContainer: { flex: 1, backgroundColor: "#222", borderRadius: 12, paddingHorizontal: 2, height: 50, justifyContent: "center" },
+  filterPicker: { color: "#fff", width: "100%" },
+  filterText: { color: "#121212", fontWeight: "bold", fontSize: 14, textAlign: "center" },
+
   tableContainer: { marginTop: 10 },
   tableHeader: {
     flexDirection: "row",
@@ -120,7 +207,7 @@ const styles = StyleSheet.create({
     justifyContent:"flex-start",
     gap: 25,
   },
-  cell: { flex: 0.5, color: "#fff", fontSize: 16},
+  cell: { flex: 0.6, color: "#fff", fontSize: 16},
   datacell: { flex: 1, color: "#fff", fontSize: 16},
 
 
