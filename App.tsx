@@ -92,11 +92,13 @@ function MainTabs( { navigation, currentUser, users, updateUserRoster, available
   const handleAddPlayer = async(player) => {
 
     // Remove player from Supabase's players table
+    /*
     const { error } = await supabase.from("players").delete().eq("name", player.name);
 
     if (error) {
       console.error("Error removing player:", error);
     }
+    */
 
   // ** Fetch current roster**
     const { data, error: fetchError } = await supabase

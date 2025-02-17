@@ -29,7 +29,7 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
         let seasonTeamData, matchData, error1, error2;
         let query;
         console.log("Start of MyTeam Filter for: ", selectedStatsType);
-        ({ data: seasonTeamData, error: error1 } = await supabase.from("players_base").select("*").eq("onroster", true));   // Fetch Season Stats
+        ({ data: seasonTeamData, error: error1 } = await supabase.from("players_base").select("*"));   // Fetch Season Stats
         if (error1) throw new Error("❌ Error fetching season stats: " + error1.message);
 
         if (selectedStatsType === "season") {
