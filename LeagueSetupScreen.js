@@ -83,6 +83,24 @@ useEffect(() => {
     }
   };
 
+  const initializeLeagueDraftState = async(leagueId) => {
+    try {
+      const { data: newData, error: insertError } = await supabase
+      .from("draft_state")
+      .insert([{ current_round: 1, current_pick: 0, draft_order: [] }])
+      .select()
+      .single();
+
+      if (insertError) {
+          console.error("Error initializing draft state:", insertError);
+          return;
+      }
+    } catch (err) {
+      console.error("🔥 Unexpected error initializing draft_state:", err);
+    }
+  };
+
+
   const handleConfirmSetup = async () => {
     console.log("Selected League", selectedLeague);
     if (!teamName.trim()) {
@@ -115,6 +133,7 @@ useEffect(() => {
 
     if (mode === "create"){
         await initializeLeaguePlayers(leagueId);
+      //  await (initializeLeagueDraftState(leagueId);
     }else{
         console.error("Players table for this league is already setup");
     }

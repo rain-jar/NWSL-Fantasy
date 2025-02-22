@@ -21,9 +21,9 @@ let draftOrder = []; // Initialize draft order
 */
 
 
-const DraftScreen = ({ leagueId, onPick, currentUser, users, navigation }) => {
+const DraftScreen = ({ onPick, currentUser, users, navigation }) => {
 
-    const { availablePlayers, setAvailablePlayers } = useLeague();
+    const { availablePlayers, setAvailablePlayers, leagueId } = useLeague();
     const { leagueParticipants, setLeagueParticipants} = useLeague();
 
     const [players, setPlayers] = useState([...availablePlayers]);
@@ -98,13 +98,19 @@ const DraftScreen = ({ leagueId, onPick, currentUser, users, navigation }) => {
       
     // Fetch draft state from Supabase
     const fetchDraftState = async () => {
-        const { data, error } = await supabase.from("draft_state").select("*").single();
+      try{
+        console.log("League Id is ", leagueId);
+        console.log("loading in Draft State is ", loading);
+        const { data, error } = await supabase.from("draft_state")
+        .select("*")
+        .eq("id", leagueId);
+        console.log("Draft State data fetched before update ", data);
     
-        if (error || !data) {
+        if (error || data.length == 0) {
          console.error("Error fetching draft state:", error);
          const { data: newData, error: insertError } = await supabase
                 .from("draft_state")
-                .insert([{ current_round: 1, current_pick: 0, draft_order: leagueParticipants }])
+                .insert([{ id: leagueId, current_round: 1, current_pick: 0, draft_order: leagueParticipants }])
                 .select()
                 .single();
 
@@ -116,17 +122,21 @@ const DraftScreen = ({ leagueId, onPick, currentUser, users, navigation }) => {
             setCurrentRound(newData.current_round);
             setCurrentPick(newData.current_pick);
             setDraftOrder(newData.draft_order);
-            console.log("Draft State is fetch for the first time")
-            console.log("Initial Draft is : Current Pick: ",newData.currentPick, " CurrentRound: ", newData.currentRound)
-            console.log("Whereas Initial App Draft  is : Current Pick: ",currentPick, " CurrentRound: ", currentRound)
+            console.log("Draft State is fetched for the first time for League ",leagueId);
+            console.log("Initial Draft is : Current Pick: ",newData.currentPick, " CurrentRound: ", newData.currentRound);
+            console.log("Whereas Initial App Draft  is : Current Pick: ",currentPick, " CurrentRound: ", currentRound);
 
         } else {
-        setDraftStateId(data.id);
-        setCurrentRound(data.current_round);
-        setCurrentPick(data.current_pick);
-        setDraftOrder(data.draft_order); // Default to teams if empty
-        console.log("Fetch State on App.tsx render. Current pick: ", data.current_pick, " Current Round: ", data.current_round)
+        console.log("Draft Fetch is successful ");
+        setDraftStateId(data[0].id);
+        setCurrentRound(data[0].current_round);
+        setCurrentPick(data[0].current_pick);
+        setDraftOrder(data[0].draft_order); // Default to teams if empty
+        console.log("Fetch State on App.tsx render ", data, "Current pick: ", data.current_pick, " Current Round: ", data.current_round)
         }
+      } catch (err) {
+        console.log("🔥 Unexpected fetch error:", err);
+      }
     };      
 
     const fetchPlayerStats = async () => {
