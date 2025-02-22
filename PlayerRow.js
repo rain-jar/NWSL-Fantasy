@@ -1,8 +1,13 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const PlayerRow = ({ player, isDrafting, onDraft }) => (
-  <View style={styles.playerRow}>
+const PlayerRow = ({ player, isDrafting, onDraft }) => {
+  //console.log("in Player Row ");
+  //console.log("Player Name is ", player.name);
+  
+
+  return (
+    <View style={styles.playerRow}>
     <Text style={styles.playerText}>
       {player.name} ({player.position})
     </Text>
@@ -10,7 +15,10 @@ const PlayerRow = ({ player, isDrafting, onDraft }) => (
       <Text style={styles.draftButtonText}>Draft</Text>
     </TouchableOpacity>
   </View> 
-);
+  );
+  
+}
+
 
 const styles = StyleSheet.create({
   playerRow: {

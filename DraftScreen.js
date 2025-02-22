@@ -7,6 +7,10 @@ import PlayerRow from "./PlayerRow";
 import TeamRoster from "./TeamRoster";
 import playerData from "./assets/players.json";
 import { subscribeToDraftUpdates } from "./supabaseListeners";
+import { subscribeToLeaguePlayerDraftUpdates } from "./supabaseListeners";
+import { LeagueProvider, useLeague } from "./LeagueContext";
+
+
 
 
 
@@ -17,11 +21,12 @@ let draftOrder = []; // Initialize draft order
 */
 
 
-const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUser, users, updateUserRoster }) => {
+const DraftScreen = ({ leagueId, onPick, currentUser, users, navigation }) => {
 
-    const navigation = useNavigation();
+    const { availablePlayers, setAvailablePlayers } = useLeague();
+    const { leagueParticipants, setLeagueParticipants} = useLeague();
 
-    //const [players, setPlayers] = useState(playerList);
+    const [players, setPlayers] = useState([...availablePlayers]);
     const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
     const [draftTurn, setdraftTurn] = useState(false);
     const [draftStateId, setDraftStateId] = useState(null);
@@ -29,15 +34,63 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
     const [currentPick, setCurrentPick] = useState(0);
     const [draftOrder, setDraftOrder] = useState([users]);
     const [isDrafting, setIsDrafting] = useState(false); 
+    const [playerStats, setPlayerStats] = useState([]);
+    const [isDataFetched, setIsDataFetched] = useState(false);
+    const [localAvailablePlayers, setlocalAvailablePlayers] = useState([...availablePlayers]);
+    const [loading, setLoading] = useState(false); // Add loading state
+    const [listenerupdate, setlistenerupdate] = useState(false);
+    
 
     useEffect(() => {
         const unsubscribe = subscribeToDraftUpdates(setCurrentRound, setCurrentPick, setDraftOrder);
         return () => unsubscribe();
     }, []);
 
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            setLoading(true); 
+            await fetchDraftState();
+            await fetchPlayerStats();
+            console.log("DraftScreen fetches draft state - currentPick:", currentPick, " currentRound:", currentRound);
+            setLoading(false);
+            console.log(" Loading inside Initial fetches", loading);
+        };
     
-    const teams = users.map((user) => ({
-        id: user.id,
+        fetchInitialData();
+    }, [leagueId, leagueParticipants]);
+
+
+  // Whenever availablePlayers (from context) changes, merge them with local playerStats to build the displayable array
+  useEffect(() => {
+    if (!loading && availablePlayers?.length > 0) {
+        console.log("After fetching ", availablePlayers);
+      const mergedList = availablePlayers.map((player) => {
+        const statsMatch = playerStats.find((m) => m.id === player.player_id) || {};
+        return {
+          ...player,
+          name: statsMatch.name || "",
+          position: statsMatch.position || "",
+        };
+      });
+      setPlayers(mergedList);
+    }
+  }, [availablePlayers, playerStats, loading]);
+/*
+    useEffect(() => {
+        const updatePlayerList = async() => {
+            console.log("Going into localAvailablePlayer state update");
+           // if (!loading) return;
+            console.log("Fetch merged player list since local available players is updated");
+            await fetchPlayers();
+            setLoading(false);
+            console.log("player list update after draft ", players);
+        };
+        updatePlayerList();
+    }, [localAvailablePlayers]);
+*/
+    
+    const teams = leagueParticipants.map((user) => ({
+        id: user.user_id,
         name: user.team_name,
         roster: user.roster,
       }));
@@ -51,7 +104,7 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
          console.error("Error fetching draft state:", error);
          const { data: newData, error: insertError } = await supabase
                 .from("draft_state")
-                .insert([{ current_round: 1, current_pick: 0, draft_order: users }])
+                .insert([{ current_round: 1, current_pick: 0, draft_order: leagueParticipants }])
                 .select()
                 .single();
 
@@ -74,13 +127,43 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
         setDraftOrder(data.draft_order); // Default to teams if empty
         console.log("Fetch State on App.tsx render. Current pick: ", data.current_pick, " Current Round: ", data.current_round)
         }
-    };        
+    };      
 
-    useEffect(() => {
-        fetchDraftState();
-        console.log("App.tsx fetches draft state - currentPick: ",currentPick," currentRound: ",currentRound)
+    const fetchPlayerStats = async () => {
+        if (!isDataFetched) {
+          console.log("Fetching Player Stats...");
+          const { data, error } = await supabase.from("players_base").select("*");
+          if (error) {
+            console.error("Error fetching player stats:", error);
+            return;
+          }
+          setPlayerStats(data);
+          setIsDataFetched(true);
+          console.log("Players Base data is fetched in DraftScreen but only once",data );
+        }
+      };
+ /*   
+    const fetchPlayers = async () => {
+        try{
+          let playerListFull
+        //  console.log("Collecting player names and positions: ", selectedStatsType);
+          console.log("Calling Fetch Players ");
+          playerListFull = localAvailablePlayers.map((player) => {
+            const seasonMerge = playerStats.find((m) => m.id === player.player_id) || {};
+            return {
+              ...player,
+              name : seasonMerge.name || "",
+              position : seasonMerge.position || "",
+            };
+          });
+          console.log("This is the merged data now ", playerListFull);
+          setPlayers(playerListFull);
+        } catch (err) {
+            console.error("🔥 Unexpected fetch error:", err);
+          }
+      };
+      */
 
-      }, []);
 /*
     if(currentRound === 1 && currentPick === 0){
         draftOrder = [...teams]; // Set it once and for all 
@@ -88,13 +171,27 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
         */
 
 
+  //  console.log("Local Available Players ", localAvailablePlayers);
+    console.log("Players List with positions and names ", players);
+    console.log("Available Players ", availablePlayers);
+    console.log("League participants ", leagueParticipants);
+    console.log("Draft Order team ", draftOrder[currentPick].team_name);
+    console.log("Roster is ", draftOrder[currentPick]);
+    console.log("Loading ", loading);
+
+
 // Position Constraints
+
     const maxPlayersPerTeam = 11;
     const minPositions = { FW: 1, MF: 3, DF: 3, GK: 1 };
     const maxPositions = { FW: 4, MF: 5, DF: 5, GK: 1 };
 
 
-    const [currentTeam, setCurrentTeam] = useState(draftOrder[currentPick]);
+    const currentTeam = draftOrder[currentPick];
+    const test = leagueParticipants.find((participant) => participant.team_name == draftOrder[currentPick].team_name);
+
+    console.log ("Current Team in DraftScreen is ", currentTeam);
+    console.log("Current Test is ", test);
 
 
 // Helper Functions
@@ -209,15 +306,15 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
 
         console.log("Drafting team is "+ draftOrder[currentPick].team_name);
 
-        if (currentUser.id != draftOrder[currentPick].id){
+        if (currentUser.id != draftOrder[currentPick].user_id){
             console.log ("It's not the current user's turn");
             setdraftTurn(true);
             setIsDrafting(false);
             return false;
         }
-        const team = teams.find(t => t.id === draftOrder[currentPick].id);
+        const team = teams.find(t => t.id === draftOrder[currentPick].user_id);
 
-        if (!team || !availablePlayers.includes(player) || !isValidPick(team, player)) {
+        if (!team || player.onroster || !isValidPick(team, player)) {
             console.log(`Invalid pick: ${player.name}`);
             setIsDrafting(false);
             return false;
@@ -234,26 +331,18 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
     //    if (success) {
 
                 // **Fetch current roster**
-            const { data, error: fetchError } = await supabase
-            .from("users")
-            .select("roster")
-            .eq("id", draftOrder[currentPick].id)
-            .single(); // Ensures we get only one row
+            
+            const currentRoster = leagueParticipants.find((participant) => participant.team_name == draftOrder[currentPick].team_name).roster;
 
-            if (fetchError) {
-            console.error("Error fetching roster:", fetchError);
-            setIsDrafting(false);
-            return;
-            }
-            const currentRoster = data?.roster || []; 
               // ** Append new player**
             const updatedRoster = [...currentRoster, player];
 
             const { error } = await supabase
-            .from("users")
+            .from("league_rosters")
             .update({ roster: updatedRoster })
-            .eq("id", draftOrder[currentPick].id);
-            console.log(`${draftOrder[currentPick].id} drafted ${player.name}`);
+            .eq("league_id", draftOrder[currentPick].league_id)
+            .eq("user_id",draftOrder[currentPick].user_id);
+            console.log(`${draftOrder[currentPick].team_name} drafted ${player.name}`);
 
             if (error) {
                 console.error("Error updating roster:", error);
@@ -266,9 +355,10 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
             
             // Update Player Status in availablePlayers in Supabase
             const { error: playerError } = await supabase
-            .from("players_base")
+            .from("league_players")
             .update({ onroster: true })
-            .eq("name", player.name);
+            .eq("player_id", player.player_id)
+            .eq("league_id", draftOrder[currentPick].league_id);
             console.log("Player: "+player.name+"'s onRoster status is true in the players table in Supabase")
 
             if (playerError) {
@@ -276,7 +366,6 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
             setIsDrafting(false);
             return;
             }
-
 
             //updateUserRoster(draftOrder[currentPick].id, (prevRoster) => [...prevRoster, { ...player, assignedPosition }]);
             //setPlayers((prevPlayers) => prevPlayers.filter((p) => p.name !== player.name));
@@ -292,7 +381,7 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
             nextTurn();
             console.log('current Team is ' + draftOrder[currentPick].team_name);
            // setCurrentTeam(draftOrder[currentPick]); // Update current team
-            onPick(player);
+         //   onPick(player);
             setIsDrafting(false);
     //    }
     };
@@ -303,16 +392,18 @@ const DraftScreen = ({ availablePlayers, setAvailablePlayers, onPick, currentUse
       <Text style={styles.title}>Snake Draft</Text>
       <Text style={styles.currentTeam}>
         {draftOrder[currentPick].team_name}'s Turn - Round {currentRound}
-         Player's left: {availablePlayers.length}
+         Player's left: {players.length}
       </Text>
 
       {/* Player List */}
       <FlatList
-        data={availablePlayers}
-        keyExtractor={(item) => item.name}
+        key = {players.length}
+        data={players}
+        keyExtractor={(item) => item.player_id}
         renderItem={({ item }) => (
           <PlayerRow player={item} isDrafting={isDrafting} onDraft={() => {
-            console.log("Current User is " + currentUser.team_name);
+            console.log("Current User is " + currentUser.user_name);
+            console.log("Player Name is ", item.name);
             handleDraft(item);}} />
         )}
       />

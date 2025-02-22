@@ -2,39 +2,54 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import supabase from "./supabaseClient";
+import { LeagueProvider, useLeague } from "./LeagueContext";
 
 
 
-const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
+
+
+const MyTeamScreen = ({ onDrop, userProfile, playerBase, navigation}) => {
     
 
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [selectedStatsType, setSelectedStatsType] = useState("week1");
-    const [currentRoster, setRoster] = useState([...roster]); // Default to season stats
+    const [currentUserData, setcurrentUserData] = useState([]); // Default to season stats
+    const { leagueParticipants, setLeagueParticipants } = useLeague();
+    
 
+    console.log("Checking league participants before update ", leagueParticipants);
 
      // Example team data
-    const teamName = userProfile?.team_name;
+    const teamName = leagueParticipants.find((m) => m.user_id === userProfile.id).team_name;
     const userName = userProfile?.user_name;
+
+    console.log("Checking current roster ", currentUserData);
     //console.log(teamName);
     //console.log(userName);
 
     useEffect(() => {
+      console.log("Checking league participants after update ", leagueParticipants);
       fetchPlayers();
-    }, [roster, selectedPlayer, selectedStatsType]);
+    }, [leagueParticipants, selectedPlayer, selectedStatsType]);
 
 
     const fetchPlayers = async () => {
       try{
         let seasonTeamData, matchData, error1, error2;
-        let query;
+        let currentRoster
+        currentRoster = leagueParticipants.find((m) => m.user_id === userProfile.id).roster;
+        console.log("Current Roster is ", currentRoster);
         console.log("Start of MyTeam Filter for: ", selectedStatsType);
+        /*
         ({ data: seasonTeamData, error: error1 } = await supabase.from("players_base").select("*"));   // Fetch Season Stats
         if (error1) throw new Error("❌ Error fetching season stats: " + error1.message);
-
+        */
         if (selectedStatsType === "season") {
-          console.log("No need to do anything");
-          setRoster(roster);
+          const currentSeasonPlayers = currentRoster.map((player) => {
+            const relevantPlayers = playerBase.find((m) => m.id === player.player_id) || {};
+            return relevantPlayers
+          })
+          setcurrentUserData(currentSeasonPlayers);
           return;
         } else if (selectedStatsType === "week1") {
           // Fetch Match Stats
@@ -46,13 +61,13 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
             throw new Error("❌ Error fetching match stats: " + error2.message);
           else
             console.log("fetched weekly data: ", matchData);
-            console.log("roster is ", roster);
+            console.log("roster is ", currentRoster);
 
-          const mergedTeamPlayers = seasonTeamData.map((player) => {
+          const mergedTeamPlayers = playerBase.map((player) => {
             const matchStats = matchData.find((m) => m.id === player.id) || {};
             return {
               ...player,
-              Opponent : matchStats.Opponent || "",
+              Opponent : matchStats.Opponent || "DNP",
               goals: matchStats.goals || 0,
               assists: matchStats.assists || 0,
               Minutes: matchStats.Minutes || 0,
@@ -66,9 +81,10 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
             }
           });
 
+
           // 🔄 **Merge Data: Default to 0s if player has no match data**
-          const currentTeamPlayers = roster.map((player) => {
-            const relevantPlayers = mergedTeamPlayers.find((m) => m.id === player.id) || {};
+          const currentTeamPlayers = currentRoster.map((player) => {
+            const relevantPlayers = mergedTeamPlayers.find((m) => m.id === player.player_id) || {};
             return relevantPlayers
           })
           console.log("Players in players table and on this current user roster: ", currentTeamPlayers);
@@ -76,13 +92,13 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
           const positionOrder = { GK: 1, DF: 2, MF: 3, FW: 4 };
 
           const sortedRoster = [...currentTeamPlayers].sort((a, b) => {
-            console.log("Current roster is :", currentRoster);
+            console.log("Current roster is :", currentTeamPlayers);
             const posA = a.position.split("-")[0]; // Use first position for hybrid roles
             const posB = b.position.split("-")[0];
             return positionOrder[posA] - positionOrder[posB];
           });
 
-          setRoster(sortedRoster);
+          setcurrentUserData(sortedRoster);
           return;
         }
       } catch (err) {
@@ -124,9 +140,9 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
         </View>
 
 
-
+        {currentUserData.length > 0 && (
         <FlatList
-          data={currentRoster}
+          data={currentUserData}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => setSelectedPlayer(item)}>
@@ -148,6 +164,7 @@ const MyTeamScreen = ({ roster, onDrop, userProfile, navigation}) => {
             </TouchableOpacity>
           )}
         />
+        )}
 
               {/* Drop Confirmation Modal */}
         <Modal visible={!!selectedPlayer} transparent animationType="slide">
@@ -207,7 +224,7 @@ const styles = StyleSheet.create({
     justifyContent:"flex-start",
     gap: 25,
   },
-  cell: { flex: 0.6, color: "#fff", fontSize: 16},
+  cell: { flex: 0.7, color: "#fff", fontSize: 16},
   datacell: { flex: 1, color: "#fff", fontSize: 16},
 
 

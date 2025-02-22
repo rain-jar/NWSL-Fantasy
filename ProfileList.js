@@ -1,12 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
+import { useEffect } from "react";
+import { LeagueProvider, useLeague } from "./LeagueContext";
+
+
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 
-const ProfileList = ({ users, onSelect, navigation }) => {
-  const handleSelectUser = (userId) => {
-    onSelect(userId);
+const ProfileList = ({ onSelect, navigation }) => {
+
+  const { users, setUsers } = useLeague();
+
+  const [profiles, setProfiles] = useState([...users]);
+
+  console.log("Checking current users in ProfileList ", users);
+
+  useEffect(() => {
+    setProfiles(users);
+  }, [users]);
+  
+
+  const handleSelectUser = async(userId) => {
+    await onSelect(userId);
     navigation.reset({
       index: 0,
-      routes: [{ name: "MainTabs" }],
+      routes: [{ name: "CreateJoinScreen" }],
     });
   };
 
@@ -14,11 +30,12 @@ const ProfileList = ({ users, onSelect, navigation }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Select Your Profile</Text>
 
-      {users.length === 0 ? (
+      {profiles.length === 0 ? (
         <Text style={styles.noUsersText}>No users found. Create a new profile.</Text>
       ) : (
         <FlatList
-          data={users}
+          key = {profiles.length}
+          data={profiles}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.userItem} onPress={() => handleSelectUser(item.id)}>

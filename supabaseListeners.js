@@ -1,128 +1,129 @@
 import supabase from "./supabaseClient";
 
-// Listener for Users & Players (Used in App.tsx)
-export const subscribeToUserAndPlayerUpdates = (setUsers, setAvailablePlayers) => {
-    console.log("Setting up real-time listeners...");
+// ✅ Subscribe to User Inserts
+export const subscribeToUserInserts = (setUsers) => {
+  const subscription = supabase
+    .channel("users-insert")
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "users" }, (payload) => {
+      console.log("🆕 New user added:", payload.new);
+      setUsers((prevUsers) => [...prevUsers, payload.new]);
+    })
+    .subscribe();
   
-    const userSubscription = supabase
-      .channel("users_changes")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "users" }, async(payload) => {
-    
-        // **Force state update using functional setState**
-        setUsers((prevUsers) => {
-          const userExists = prevUsers.some((user) => user.id === payload.new.id);
+  return () => supabase.removeChannel(subscription);
+};
 
-          if (userExists) {
-            // Update existing user
-            return prevUsers.map((user) =>
-              user.id === payload.new.id ? { ...user, ...payload.new } : user
-            );
-          } else {
-            // Add new user to the list
-            console.log("🆕 Adding new user:", JSON.stringify(payload.new));
-            return [...prevUsers, payload.new]; // Append new user
-          }
-        });   
-      })
+// ✅ Subscribe to League Inserts
+export const subscribeToLeagueInserts = (setAvailableLeagues) => {
+  const subscription = supabase
+    .channel("leagues-insert")
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "leagues" }, (payload) => {
+      console.log("🆕 New league created:", payload.new);
+      setAvailableLeagues((prevLeagues) => [...prevLeagues, payload.new]);
+    })
+    .subscribe();
 
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "users" }, (payload) => {
+  return () => supabase.removeChannel(subscription);
+};
 
-        setUsers((prevUsers) => {
-            console.log("👥 Current users before update:", JSON.stringify(prevUsers));
-            console.log("🔍 Incoming payload:", JSON.stringify(payload.new));
-          
-            const userExists = prevUsers.some((user) => user.id === payload.new.id);
-          
-            if (userExists) {
-              // **Check if the roster has changed**
-              const existingUser = prevUsers.find((user) => user.id === payload.new.id);
-              console.log("Existing user roster :", existingUser.roster);
+// ✅ Subscribe to League Roster Inserts (New User Joins League)
+export const subscribeToLeagueRosterInserts = (setLeagueParticipants, leagueId) => {
+  const subscription = supabase
+    .channel("league_rosters-insert")
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "league_rosters" }, async(payload) => {
+      console.log("🆕 User joined league:", payload.new);
+      const { data, error } = await supabase
+      .from("league_rosters")
+      .select("*")
+      .eq("league_id", leagueId)
 
-              if (JSON.stringify(existingUser.roster) !== JSON.stringify(payload.new.roster)) {
-                    console.log("🔄 Updating roster for user:", payload.new.id);
+      if (!error) {
+        setLeagueParticipants(data);
+        console.log("Insert Listener fetches the updated league participants list", data);
+      }else{
+         console.log("Error in fetching", error.message);
+      }
+    })
+    .subscribe();
 
-                    const oldRoster = existingUser.roster || [];
-                    const newRoster = payload.new.roster || [];
-                
-                    // **Find drafted or added players (added to roster)**
-                    const draftedPlayers = newRoster.filter((player) =>
-                    !oldRoster.some((p) => p.name === player.name)
-                    );
+  return () => supabase.removeChannel(subscription);
+};
 
-                    // **Find dropped players (removed from roster)**
-                    const droppedPlayers = oldRoster.filter((player) =>
-                        !newRoster.some((p) => p.name === player.name)
-                    );                   
+// ✅ Subscribe to League Roster Updates (User Updates Team Name or Roster)
+export const subscribeToLeagueRosterUpdates = (setLeagueParticipants, leagueId) => {
+  const subscription = supabase
+    .channel("league_rosters-update")
+    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "league_rosters" }, async(payload) => {
+      console.log("🔄 League roster updated:", payload.new);
+      const { data, error } = await supabase
+      .from("league_rosters")
+      .select("*")
+      .eq("league_id", leagueId)
 
-                    console.log("✅ Drafted or Added players:", JSON.stringify(draftedPlayers));
-                    console.log("❌ Dropped players:", JSON.stringify(droppedPlayers));
+      if (!error) {
+        setLeagueParticipants(data);
+        console.log("Listener fetches the updated league roster list", data);
+      }else{
+         console.log("Error in fetching", error.message);
+      }
+    })
+    .subscribe();
 
-                  
-                    console.log("🔄 Updating roster for user:", payload.new.id);
-                    return prevUsers.map((user) =>
-                    user.id === payload.new.id ? { ...user, roster: payload.new.roster } : user);
-                }
+  return () => supabase.removeChannel(subscription);
+};
 
-            } else {
-              // **If user does not exist, add them**
-              console.log("🆕 Adding new user:", JSON.stringify(payload.new));
-              return [...prevUsers, payload.new];
-            }
-            console.log("User roster updated:", payload.new);
-        });
-
-      })
-
-      
-      .subscribe();
-  
-    const playerSubscription = supabase
-      .channel("players_changes")
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "players_base" }, async(payload) => {
-        console.log("🔍 Incoming payload:", JSON.stringify(payload.old));
-        console.log("Player:", payload.id," is already removed while updating team")
-
-      })
-
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "players_base" }, async(payload) => {
-        console.log("Inside UpdateListener" );
-
+// ✅ Subscribe to League Player Inserts (New Player Added to League Pool)
+export const subscribeToLeaguePlayerInserts = (setAvailablePlayers) => {
+  const subscription = supabase
+    .channel("league_players-insert")
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "league_players" }, async(payload) => {
+      console.log("🆕 New player added to league:", payload.new);
+      // Only act if it's the same league
+      if (payload.new.league_id === selectedLeagueId) {
+        // Re-fetch the updated list of available players
         const { data, error } = await supabase
-        .from("players_base")
-        .select("*")
-        .eq("onroster", false); // Fetch only players NOT on a team
+          .from("league_players")
+          .select("*")
+          .eq("league_id", selectedLeagueId)
+          .eq("onroster", false);
 
-        if (!error) {
-          setAvailablePlayers(data); // Populate state dynamically
-          const droppedPlayer = data.find((p) => p.name === payload.new.name)
-          if(droppedPlayer)
-             console.log("Dropped Player:", droppedPlayer.name,"'s status is already updated while updated to: ", droppedPlayer.onroster)
-          else
-           console.log("Check deeper")
+          if (!error && data) {
+            setAvailablePlayers(data);
+          } else if (error) {
+            console.error("❌ Error re-fetching league players:", error);
+          }
         }
-        
-      })
+    })
+    .subscribe();
 
+  return () => supabase.removeChannel(subscription);
+};
 
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "players_base" }, (payload) => {
+// ✅ Subscribe to League Player Updates (Draft, Add, Drop Players)
+export const subscribeToLeaguePlayerUpdates = (setAvailablePlayers, leagueId) => {
+  const subscription = supabase
+    .channel("league_players-update")
+    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "league_players" }, async(payload) => {
+      console.log("🔄 Player availability updated:", payload.new);
 
-        setAvailablePlayers((prevPlayers) => {  
-            console.log("✅ Adding dropped player back:", payload.new.name);
-            if (!prevPlayers.some((p) => p.name === payload.new.name)) {
-                console.log("Appending ", payload.new.name);
-                return [...prevPlayers, payload.new]; // Append only if not present
-            }
-            return prevPlayers;
-          });
-      })
-      .subscribe();
-  
-    return () => {
-      supabase.removeChannel(userSubscription);
-      supabase.removeChannel(playerSubscription);
-    };
-  };
+      const { data, error } = await supabase
+      .from("league_players")
+      .select("*")
+      .eq("league_id", leagueId)
+      .eq("onroster", false); // Fetch only players NOT on a team
 
+      if (!error) {
+        setAvailablePlayers(data);
+        console.log("Listener fetches the updated player list for PlayerList", data);
+      }else{
+         console.log("Error in fetching", error.message);
+      }
+
+    })
+    .subscribe();
+
+  return () => supabase.removeChannel(subscription);
+};
 
 
 // Listener for Draft (Used in DraftScreen.js)

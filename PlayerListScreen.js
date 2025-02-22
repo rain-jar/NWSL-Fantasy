@@ -6,13 +6,19 @@ import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native";
 //import { ScrollView } from "react-native-gesture-handler";
 import supabase from "./supabaseClient";
+import { LeagueProvider, useLeague } from "./LeagueContext";
 
 
 
 
-const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
 
-    const [players, setPlayers] = useState([...playerData]);
+const PlayerListScreen = ({ onAdd, navigation, playerBase }) => {
+
+    const { availablePlayers, setAvailablePlayer } = useLeague();
+    const { leagueParticipants, setLeagueParticipants, userId } = useLeague();
+    
+  
+    const [players, setPlayers] = useState([...playerBase]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedPosition, setSelectedPosition] = useState("");
     const [selectedTeam, setSelectedTeam] = useState("");
@@ -25,26 +31,52 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
     const [modalMessage, setModalMessage] = useState("");
 
     const [scrollX, setScrollX] = useState(0); // Track scroll position
-  
+
+    console.log("Checking Available Players in PlayerScreen ", availablePlayers);
+    console.log ("Checking Avail. players after merge ", players);
+   // console.log("Checking Current User Data in PlayerScreen", teamRoster);
+    console.log("Checking PlayerBase Data in PlayerScreen ", playerBase);
+    //console.log("Checking current User's team roster ", teamRoster);
+
+
     useEffect(() => {
       fetchPlayers().then((updatedList) => {
         filterAndSortPlayers(updatedList); // Pass fetched list for filtering
       });
-    }, [searchQuery, selectedPosition, selectedTeam, sortField, sortOrder, selectedStatsType]);
+    }, [searchQuery, selectedPosition, selectedTeam, sortField, sortOrder, selectedStatsType, availablePlayers]);
+
   
     const fetchPlayers = async (playerListTemp) => {
         try{
-          let seasonData, matchData, error1, error2;
-          let query;
+          let playerListFull, matchData, error1, error2;
           console.log("starting to fetch players for: ", selectedStatsType);
-          ({ data: seasonData, error: error1 } = await supabase.from("players_base").select("*").eq("onroster", false));   // Fetch Season Stats
-          if (error1) throw new Error("❌ Error fetching season stats: " + error1.message);
+          playerListFull = availablePlayers.map((player) => {
+            const seasonMerge = playerBase.find((m) => m.id === player.player_id) || {};
+            return {
+              ...player,
+              name : seasonMerge.name || "",
+              team : seasonMerge.team || "",
+              position : seasonMerge.position || "",
+              goals: seasonMerge.goals || 0,
+              assists: seasonMerge.assists || 0,
+              Minutes: seasonMerge.Minutes || 0,
+              PKMissed: seasonMerge.PKMissed || 0,
+              "Goals Against": seasonMerge["Goals Against"] || 0,
+              Saves: seasonMerge.Saves || 0,
+              "Clean Sheet": seasonMerge["Clean Sheet"] || 0,
+              "Yellow Cards": seasonMerge["Yellow Cards"] || 0,
+              "Red Cards": seasonMerge["Red Cards"] || 0,
+              image_url : seasonMerge.image_url || "",
+              FantasyPoints: seasonMerge.FantasyPoints || 0,
+            };
+          });
+          console.log("✅ Season - Full Available Player List :", playerListFull);
 
           if (selectedStatsType === "season") {
-            setPlayerList(seasonData); 
-            console.log("✅ Season Player List Updated:", seasonData);
-            playerListTemp = seasonData
+            console.log("For season filter - returning playerListFull");
+            playerListTemp = playerListFull;
             return playerListTemp;
+
           } else if (selectedStatsType === "week1") {
             // Fetch Match Stats
             ({ data: matchData, error: error2 } = await supabase
@@ -57,8 +89,8 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
               console.log("fetched weekly data: ", matchData);
 
             // 🔄 **Merge Data: Default to 0s if player has no match data**
-            const mergedPlayers = seasonData.map((player) => {
-              const matchStats = matchData.find((m) => m.id === player.id) || {};
+            const mergedPlayers = playerListFull.map((player) => {
+              const matchStats = matchData.find((m) => m.id === player.player_id) || {};
               return {
                 ...player,
                 goals: matchStats.goals || 0,
@@ -75,7 +107,7 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
             }); 
             setPlayerList(mergedPlayers);  
             console.log("New Player View merged for Weekly data", mergedPlayers);
-            playerListTemp = mergedPlayers
+            playerListTemp = mergedPlayers;
             return playerListTemp;
           }
         } catch (err) {
@@ -137,6 +169,10 @@ const PlayerListScreen = ({ playerData, onAdd, teamRoster, navigation }) => {
 
     // Adding a Player --> check for Team empty spots
     const checkAndAddPlayer = () => {
+        const teamRoster = leagueParticipants.find((participant) => participant.user_id == userId).roster
+
+        console.log("current Roster before checking and adding ", teamRoster);
+        console.log("player data before adding ", selectedPlayer);
 
 
         const maxPlayersPerTeam = 11;

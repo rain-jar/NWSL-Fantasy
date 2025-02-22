@@ -9,19 +9,19 @@ const ProfileScreen = ({ navigation, onSave }) => {
   const [userName, setUserName] = useState("");
 
   const handleSaveProfile = async () => {
-    if (!teamName || !userName) {
-      alert("Please enter both Team Name and User Name.");
+    if (!userName) {
+      alert("Please enter User Name.");
       return;
     }
     
-    profile = [{ tN: teamName, uN: userName}];
+//    profile = [{ tN: teamName, uN: userName}];
     //console.log("Profile to App.tsx");
 
-
-    onSave(teamName,userName);
+    
+    await onSave(userName);
     navigation.reset({
         index: 0,
-        routes: [{ name: "MainTabs" }],
+        routes: [{ name: "CreateJoinScreen" }],
     });
 
 
@@ -34,14 +34,6 @@ const ProfileScreen = ({ navigation, onSave }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Your Profile</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Team Name"
-        placeholderTextColor="#aaa"
-        value={teamName}
-        onChangeText={setTeamName}
-      />
       
       <TextInput
         style={styles.input}
