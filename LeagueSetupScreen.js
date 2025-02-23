@@ -6,7 +6,7 @@ import {subscribeToLeagueInserts} from "./supabaseListeners";
 
 
 const LeagueSetupScreen = ({ route, navigation, onLeagueChosen }) => {
-  const { mode,leagueName, leagueId, userId, leaguesTemp } = route.params; // Mode: "create" or "join"
+  const { mode,leagueName, leagueId, userId, leaguesTemp, leagues } = route.params; // Mode: "create" or "join"
   const [teamName, setTeamName] = useState("");
   const [leagueType, setLeagueType] = useState("Standard H2H"); // Default league type
   const [availableLeagues, setAvailableLeagues] = useState([]);
@@ -41,8 +41,23 @@ useEffect(() => {
     }
     leagueList = data;
     console.log("Available Leagues are: ", leagueList);
+    console.log("User Leagues ", leagues);
+    try{
+      const registeredLeagueIds = leagues.map((league) => league.id);
+      console.log("registeredLeagueIds ", registeredLeagueIds);
+      const temp = registeredLeagueIds.some((p) => p === "03cf651b-693f-4171-b74e-8300bf28fc10");
+      console.log(temp);
+      const joinableLeagues = leagueList.filter((league) => !registeredLeagueIds.some((p) => p === league.league_id)
+      );
+      console.log("Joinable Leagues", joinableLeagues );
+      leagueList = [...joinableLeagues];
+      console.log("Updated League List ", leagueList);
+    } catch (err) {
+      console.error("🔥 Unexpected fetch error:", err);
+    }
     return leagueList || [];
   };
+
 
   const initializeLeaguePlayers = async (leagueId) => {
     try {
@@ -178,22 +193,28 @@ useEffect(() => {
         </>
       ) : (
         <>
-          <Text style={styles.label}>Select a League</Text>
-          <FlatList
-            data={availableLeagues}
-            keyExtractor={(item) => (item?.id ? item.id.toString() : Math.random().toString())}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.leagueItem,
-                  selectedLeague?.id === item.id && styles.selectedLeague,
-                ]}
-                onPress={() => setSelectedLeague(item)}
-              >
-                <Text style={styles.leagueText}>{item.league_name}</Text>
-              </TouchableOpacity>
-            )}
-          />
+          {availableLeagues.length === 0 ? (
+            <Text style={styles.noUsersText}>No Leagues found.</Text>
+          ) : (
+            <>
+              <Text style={styles.label}>Select a League</Text>
+              <FlatList
+              data={availableLeagues}
+              keyExtractor={(item) => (item?.league_id ? item.league_id.toString() : Math.random().toString())}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.leagueItem,
+                    selectedLeague?.id === item.league_id && styles.selectedLeague,
+                  ]}
+                  onPress={() => setSelectedLeague(item)}
+                >
+                  <Text style={styles.leagueText}>{item.league_name}</Text>
+                </TouchableOpacity>
+              )}
+              />
+            </>
+          )}
 
           {selectedLeague && (
             <>
@@ -238,7 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
     marginBottom: 5,
-    alignSelf: "flex-start",
+    alignSelf:"center",
   },
   pickerContainer: {
     backgroundColor: "#333",
@@ -262,7 +283,8 @@ const styles = StyleSheet.create({
   },
   leagueItem: {
     padding: 15,
-    backgroundColor: "#444",
+    backgroundColor: "#056813",
+    marginTop : 20,
     marginBottom: 10,
     borderRadius: 8,
     width: "100%",
@@ -273,6 +295,10 @@ const styles = StyleSheet.create({
   },
   leagueText: {
     color: "#fff",
+    fontSize: 16,
+  },
+  noUsersText: {
+    color: "#ccc",
     fontSize: 16,
   },
 });

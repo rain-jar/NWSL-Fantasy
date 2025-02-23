@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 
 const PlayerRow = ({ player, isDrafting, onDraft }) => {
   //console.log("in Player Row ");
@@ -8,6 +8,7 @@ const PlayerRow = ({ player, isDrafting, onDraft }) => {
 
   return (
     <View style={styles.playerRow}>
+    <Image source={require("./assets/placeholder.png")} style={{ width: 40, height: 40, borderRadius: 25}} resizeMode="cover"/>                           
     <Text style={styles.playerText}>
       {player.name} ({player.position})
     </Text>

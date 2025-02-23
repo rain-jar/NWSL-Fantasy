@@ -70,6 +70,7 @@ const DraftScreen = ({ onPick, currentUser, users, navigation }) => {
           ...player,
           name: statsMatch.name || "",
           position: statsMatch.position || "",
+          image_url: statsMatch.image_url || "",
         };
       });
       setPlayers(mergedList);

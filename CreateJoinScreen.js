@@ -57,7 +57,7 @@ const CreateJoinScreen = ({ navigation, currentUser, onLeagueChosen }) => {
     const leagueId = data.league_id;
     const userId = currentUser.id;
 
-    navigation.navigate("LeagueSetupScreen", { mode: "create",leagueName, leagueId, userId });
+    navigation.navigate("LeagueSetupScreen", { mode: "create",leagueName, leagueId, userId, leagues });
   };
 
   const handleJoinLeague = async() => {
@@ -71,7 +71,7 @@ const CreateJoinScreen = ({ navigation, currentUser, onLeagueChosen }) => {
     console.log("leagueList is : ", data);
     const leaguesTemp = data;
     console.log("Fetched before navigating to SetupScreen ", leaguesTemp);
-    navigation.navigate("LeagueSetupScreen", { mode: "join", userId, leaguesTemp });
+    navigation.navigate("LeagueSetupScreen", { mode: "join", userId, leagues });
   }
 
   return (
