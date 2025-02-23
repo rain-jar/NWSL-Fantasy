@@ -39,7 +39,7 @@ const ProfileList = ({ onSelect, navigation }) => {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.userItem} onPress={() => handleSelectUser(item.id)}>
-              <Text style={styles.userName}>{item.user_name} ({item.team_name})</Text>
+              <Text style={styles.userName}>{item.user_name}</Text>
             </TouchableOpacity>
           )}
         />
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
-    width: "80%",
+    width: "100%",
     alignItems: "center",
   },
   userName: {
