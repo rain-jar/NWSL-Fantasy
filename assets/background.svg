@@ -1,0 +1,24 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg" style="background-color: #000;">
+  <!-- Subtle soccer ball silhouette (faint lines) -->
+  <defs>
+    <!-- A simple soccer ball pattern -->
+    <pattern id="soccerPattern" patternUnits="userSpaceOnUse" width="200" height="200">
+      <!-- Ball outline circle -->
+      <circle cx="100" cy="100" r="90" fill="none" stroke="white" stroke-width="1" stroke-opacity="0.06"/>
+      <!-- Pentagon-like shapes (extremely minimal) -->
+      <path d="M100 25 L120 65 L160 65 L130 90 L140 130 L100 110 L60 130 L70 90 L40 65 L80 65 Z" 
+            fill="none" 
+            stroke="white" 
+            stroke-width="1" 
+            stroke-opacity="0.06"/>
+    </pattern>
+  </defs>
+  
+  <!-- Large faint pattern overlay -->
+  <rect width="100%" height="100%" fill="url(#soccerPattern)"/>
+  
+  <!-- Main text: "Fantasy WoSo here" -->
+  <text x="50%" y="50%" fill="#fff" font-size="96" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">
+    Fantasy WoSo here
+  </text>
+</svg>
