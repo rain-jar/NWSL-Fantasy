@@ -8,7 +8,7 @@ const WelcomeScreen = ({ navigation }) => {
 
       <View style={styles.container}>
         <Image
-          source={require("./assets/NWSLLandingImage.png")}
+          source={require("./assets/NWSLLandingPic.png")}
           style={styles.backgroundImage}
           resizeMode="cover"
         />
@@ -40,10 +40,10 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     position: "absolute",
-    width: "100%",    // Fill the entire screen width
-    height: "120%",  // Fill the entire screen height
+    width: "140%",    // Fill the entire screen width
+    height: "110%",  // Fill the entire screen height
     top: 0,
-    left: "6%",
+    left: "-15%",
     // The Image will fill the container using the "cover" mode
   },
 
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
 
     // Distinct background & border
-    backgroundColor: '#FFF', // Green background
+    backgroundColor: '#fff', // Green background
     borderColor: '#000',     // Yellow border
     borderWidth: 3,
 

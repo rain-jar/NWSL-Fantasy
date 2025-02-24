@@ -24,13 +24,14 @@ const CreateJoinScreen = ({ navigation, currentUser, onLeagueChosen }) => {
 
       const { data, error } = await supabase
         .from("league_rosters")
-        .select("league_id, leagues(league_name)")
+        .select("league_id, leagues(league_name), team_name")
         .eq("user_id", currentUser.id);
 
       if (error) {
         console.error("Error fetching user leagues:", error);
       } else {
-        setLeagues(data.map((entry) => ({ id: entry.league_id, name: entry.leagues.league_name })));
+
+        setLeagues(data.map((entry) => ({ id: entry.league_id, name: entry.leagues.league_name, team_name: entry.team_name })));
         console.log("Fetched User Leagues in CreateJoin for ", data);
 
       }
@@ -78,6 +79,7 @@ const CreateJoinScreen = ({ navigation, currentUser, onLeagueChosen }) => {
     navigation.navigate("LeagueSetupScreen", { mode: "join", userId, leagues });
   }
 
+  console.log("Leagues ", leagues);
   return (
     <View style={styles.container}>
     
@@ -143,7 +145,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#1E1E1E",  paddingHorizontal: 15, paddingTop: 40 },
   title: { fontSize: 24, fontWeight: "bold", color: "#fff", marginVertical: 40, textAlign: "center"},
   subtitle: { fontSize: 20, fontWeight: "bold", color: "#bbb", marginBottom: 0 },
-  emptyText: { fontSize: 16, color: "#777", marginBottom: 20 },
+  emptyText: { fontSize: 16, color: "#777", textAlign:"center",marginBottom: 20 },
  // leagueCard: { backgroundColor: "#333", padding: 15, borderRadius: 8, alignItems: "center" },
   //leagueName: { color: "#fff", fontSize: 18, fontWeight: "bold" },
   buttonList: {flex : 1, alignItems:"center"},
@@ -154,7 +156,7 @@ const styles = StyleSheet.create({
   buttonNew :{ backgroundColor: "#4CAF50", padding: 12, borderRadius: 8, alignItems: "center", marginVertical: 10, width: "80%" },
   cardContainer: {
     width: "100%",
-    height : "100%",
+    height : "90%",
     // Overall card layout
     marginVertical: 10,
     marginHorizontal: 0,
@@ -185,8 +187,8 @@ const styles = StyleSheet.create({
 
   leagueName: {
     marginVertical: 5,
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '800',
     marginBottom: 5,
     textAlign: "center",
     color: '#FFF', // if your gradient is dark; otherwise adjust as needed
@@ -197,12 +199,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.3)', // or any color you want
     borderStyle: 'dotted',
-    marginVertical: 8,
+    marginVertical: 10,
   },
 
   teamName: {
-    fontSize: 14,
-    fontWeight: '400',
+    fontSize: 18,
+    fontWeight: '500',
+    textAlign: "center",
+
+    marginVertical: 5,
+    marginBottom: 5,
     color: '#fff', // match or contrast with your gradient
   },
 });
