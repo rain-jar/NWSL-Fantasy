@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal, Button } from "react-native";
+import { View, Text, Image, TextInput, FlatList, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Modal, Button } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { Picker } from "@react-native-picker/picker";
 //import playerDataNew from "./assets/players.json";
 import { ScrollView } from "react-native";
 //import { ScrollView } from "react-native-gesture-handler";
 import supabase from "./supabaseClient";
 import { LeagueProvider, useLeague } from "./LeagueContext";
+import DropDownPicker from 'react-native-dropdown-picker';
+
 
 
 
@@ -210,6 +211,36 @@ const PlayerListScreen = ({ onAdd, navigation, playerBase }) => {
           setSelectedPlayer(null); // Close modal
     }
 
+    const [teamOpen, setTeamOpen] = useState(false);
+    const [positionOpen, setPositionOpen] = useState(false);
+    const [leagueOpen, setLeagueOpen] = useState(false);
+    const [positions, setPositions] = useState([
+      { label: 'Pos', value: '' },
+      { label: 'FW', value: 'FW' },
+      { label: 'MF', value: 'MF' },
+      { label: 'DF', value: 'DF' },
+    ]);
+    const [statsOptions, setStatsOptions] = useState([
+      { label: '2024', value: 'season' },
+      { label: 'Week 1', value: 'week1' },
+    ]);
+    const [teams, setTeams] = useState([]);
+
+
+    useEffect(() => {
+      const uniqueTeams = [...new Set(players.map((p) => p.team))].map((team) => ({
+        label: team,
+        value: team,
+      }));
+      setTeams([{ label: 'Teams', value: '' }, ...uniqueTeams]);
+    }, [players]);
+
+    const closeAllDropdowns = () => {
+      setTeamOpen(false);
+      setPositionOpen(false);
+      setLeagueOpen(false);
+    };
+
     return(
         <View style={styles.container}>
         <Text style={styles.title}>Player List</Text>
@@ -224,40 +255,64 @@ const PlayerListScreen = ({ onAdd, navigation, playerBase }) => {
         />
   
         {/* Filters Row */}
-        <View style={styles.filterRow}>
-          <View style={styles.filterPickerContainer}>
-            <Picker selectedValue={selectedPosition} onValueChange={setSelectedPosition} style={styles.filterPicker}>
-              <Picker.Item style={styles.filterText} label="Position" value="" />
-              <Picker.Item style={styles.filterText} label="FW" value="FW" />
-              <Picker.Item style={styles.filterText} label="MF" value="MF" />
-              <Picker.Item style={styles.filterText} label="DF" value="DF" />
-              <Picker.Item style={styles.filterText} label="GK" value="GK" />
-            </Picker>
-          </View>
-  
-          <View style={styles.filterPickerContainer}>
-            <Picker selectedValue={selectedTeam} onValueChange={setSelectedTeam} style={styles.filterPicker}>
-              <Picker.Item style={styles.filterText} label="Team" value="" />
-              {[...new Set(players.map((p) => p.team))].map((team) => (
-                <Picker.Item style={styles.filterText} key={team} label={team} value={team} />
-              ))}
-            </Picker>
-          </View>
+          <View style={styles.filterRow}>
 
-          <View style={styles.filterPickerContainer}>
-            <Picker
-              selectedValue={selectedStatsType}
-              onValueChange={(value) => {
-                console.log("Changing Stats Filter");
-                setSelectedStatsType(value);}}
-              style={styles.filterPicker}
-            >
-              <Picker.Item style={styles.filterText} label="Last Season(total)" value="season" />
-              <Picker.Item style={styles.filterText} label="Week 1" value="week1" />
-            </Picker>
-          </View>
+            <View style={styles.filterPickerContainer}>
+                <DropDownPicker
+                  open={positionOpen}
+                  value={selectedPosition}
+                  items={positions}
+                  setOpen={setPositionOpen}
+                  setValue={setSelectedPosition}
+                  setItems={setPositions}
+                  placeholder="Select Position"
+                  onOpen={() => {
+                    setTeamOpen(false);
+                    setLeagueOpen(false);
+                  }}
+                  style={styles.dropdown}
+                  textStyle={styles.text}
+                  dropDownContainerStyle={styles.dropdownContainer}
+              />
+            </View>
+            <View style={styles.filterPickerContainer}>
+              <DropDownPicker
+                open={teamOpen}
+                value={selectedTeam}
+                items={teams}
+                setOpen={setTeamOpen}
+                setValue={setSelectedTeam}
+                setItems={setTeams}
+                placeholder="Select Position"
+                onOpen={() => {
+                  setPositionOpen(false);
+                  setLeagueOpen(false);
+                }}
+                style={styles.dropdown}
+                textStyle={styles.text}
+                dropDownContainerStyle={styles.dropdownContainer}
+              />
+            </View>
+            <View style={styles.filterPickerContainer}>
+              <DropDownPicker
+                open={leagueOpen}
+                value={selectedStatsType}
+                items={statsOptions}
+                setOpen={setLeagueOpen}
+                setValue={setSelectedStatsType}
+                setItems={setStatsOptions}
+                placeholder="Select Position"
+                onOpen={() => {
+                  setTeamOpen(false);
+                  setPositionOpen(false);
+                }}
+                style={styles.dropdown}
+                textStyle={styles.text}
+                dropDownContainerStyle={styles.dropdownContainer}
+              />
+            </View>
 
-        </View>
+          </View>
 
         {/* Table Header */}
         <View style={{ flex: 1, padding: 10 }}>
@@ -371,7 +426,8 @@ const PlayerListScreen = ({ onAdd, navigation, playerBase }) => {
             </View>
             </View>
         </Modal>
-      </View>
+        </View>
+
     );
   };
   
@@ -380,10 +436,13 @@ const PlayerListScreen = ({ onAdd, navigation, playerBase }) => {
     title: { color: "#fff", fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 10 },
     draftButton: { backgroundColor: "#4CAF50", padding: 10, borderRadius: 8, alignItems: "center", marginTop: 20},
     draftButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-    searchBar: { backgroundColor: "#333", color: "#fff", padding: 10, borderRadius: 8, marginBottom: 12 },
-    filterRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12, gap: 15 },
+    searchBar: {  backgroundColor: "#333", color: "#fff", padding: 10, borderRadius: 8, marginBottom: 12 },
+    filterRow: {  zIndex:1000, flexDirection: "row", justifyContent: "space-between", marginBottom: 12, gap: 15 },
     filterPickerContainer: { flex: 1, backgroundColor: "#222", borderRadius: 12, paddingHorizontal: 2, height: 50, justifyContent: "center" },
-    filterPicker: { color: "#fff", width: "100%" },
+    dropdown: {  backgroundColor: '#333', borderColor: '#000', width: "100%"},
+    text: { color: 'white'},
+    dropdownContainer: { backgroundColor: '#1E1E1E'},
+    filterPicker: {  backgroundColor: "#FFF", color: "#fff", width: "100%" },
     filterText: { color: "#121212", fontWeight: "bold", fontSize: 14, textAlign: "center" },
     tableHeader: { flexDirection: "row", backgroundColor: "#444", paddingVertical: 10, height: 50, width: 1000},
     headerCell: { flex: 1, textAlign: "center" },

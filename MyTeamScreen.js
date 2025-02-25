@@ -3,9 +3,7 @@ import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, Modal, Butto
 import { Picker } from "@react-native-picker/picker";
 import supabase from "./supabaseClient";
 import { LeagueProvider, useLeague } from "./LeagueContext";
-
-
-
+import DropDownPicker from 'react-native-dropdown-picker';
 
 
 const MyTeamScreen = ({ onDrop, userProfile, playerBase, navigation}) => {
@@ -106,6 +104,11 @@ const MyTeamScreen = ({ onDrop, userProfile, playerBase, navigation}) => {
       }
     };
 
+    const [leagueOpen, setLeagueOpen] = useState(false);
+    const [statsOptions, setStatsOptions] = useState([
+      { label: 'Last Season(total)', value: 'season' },
+      { label: 'Week 1', value: 'week1' },
+    ]);
 
   return (
     <View style={styles.container}>
@@ -118,6 +121,23 @@ const MyTeamScreen = ({ onDrop, userProfile, playerBase, navigation}) => {
       {/* Filters Row */}
       <View style={styles.filterRow}>
         <View style={styles.filterPickerContainer}>
+          <DropDownPicker
+            open={leagueOpen}
+            value={selectedStatsType}
+            items={statsOptions}
+            setOpen={setLeagueOpen}
+            setValue={setSelectedStatsType}
+            setItems={setStatsOptions}
+            placeholder="Select Position"
+            style={styles.dropdown}
+            textStyle={styles.text}
+            dropDownContainerStyle={styles.dropdownContainer}
+          />
+        </View>
+
+
+        {/*
+        <View style={styles.filterPickerContainer}>
           <Picker selectedValue={selectedStatsType} 
             onValueChange={(value) => {
             console.log("Changing MyTeam Stats Filter");
@@ -127,6 +147,7 @@ const MyTeamScreen = ({ onDrop, userProfile, playerBase, navigation}) => {
               <Picker.Item style={styles.filterText} label="Week 1" value="week1" />
           </Picker>
         </View>
+       */} 
       </View>
 
 
@@ -197,6 +218,10 @@ const styles = StyleSheet.create({
   username: { color: "#bbb", fontSize: 16, textAlign: "left", marginTop: 4 },
 
   filterRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12, gap: 15 },
+  dropdown: {  backgroundColor: '#888', borderColor: '#000'},
+  text: { color: 'white'},
+  dropdownContainer: { backgroundColor: '#888'},
+  
   filterPickerContainer: { flex: 1, backgroundColor: "#222", borderRadius: 12, paddingHorizontal: 2, height: 50, justifyContent: "center" },
   filterPicker: { color: "#fff", width: "100%" },
   filterText: { color: "#121212", fontWeight: "bold", fontSize: 14, textAlign: "center" },

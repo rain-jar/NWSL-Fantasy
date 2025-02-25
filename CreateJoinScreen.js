@@ -151,8 +151,8 @@ const styles = StyleSheet.create({
   buttonList: {flex : 1, alignItems:"center"},
   createLeagueContainer: { flexDirection: "row", alignItems: "center", gap: 10 },
   input: { width: "60%", padding: 10, borderWidth: 1, borderColor: "#666", borderRadius: 8, marginBottom: 10, color: "#fff", backgroundColor: "#333" },
-  button: { backgroundColor: "#4CAF50", padding: 12, borderRadius: 8, alignItems: "center", marginVertical: 10, width: "40%" },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  button: { backgroundColor: "#4CAF50", padding: 12, borderRadius: 8, marginVertical: 10, width: "60%" },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold", textAlign:"center" },
   buttonNew :{ backgroundColor: "#4CAF50", padding: 12, borderRadius: 8, alignItems: "center", marginVertical: 10, width: "80%" },
   cardContainer: {
     width: "100%",
