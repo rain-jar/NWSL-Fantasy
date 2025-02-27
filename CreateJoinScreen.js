@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ScrollView } from "react-native";
 import { View, Text, Image, FlatList, TouchableOpacity, TextInput, Button, StyleSheet } from "react-native";
 import supabase from "./supabaseClient";
 //import LinearGradient from 'react-native-linear-gradient'; // install separately
@@ -88,23 +89,28 @@ const CreateJoinScreen = ({ navigation, currentUser, onLeagueChosen }) => {
       {leagues.length === 0 ? (
         <Text style={styles.emptyText}>You haven't joined any leagues yet.</Text>
       ) : (
-        <FlatList
-          data={leagues}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                onLeagueChosen(item.id);
-                navigation.reset({ index: 0, routes: [{ name: "MainTabs" }] });
-              }}
-            >
-              <Text style={styles.leagueName}>{item.name}</Text>
-              <View style={styles.dottedDivider} />
-              <Text style={styles.teamName}>{item.team_name}</Text>
-            </TouchableOpacity>
-          )}
-        />
+        <View style={styles.listContainer}>
+          <FlatList
+            data={leagues}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={{ paddingVertical: 5 }}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled={true}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.cardContainer,  { marginBottom: 0 }]}
+                onPress={() => {
+                  onLeagueChosen(item.id);
+                  navigation.reset({ index: 0, routes: [{ name: "MainTabs" }] });
+                }}
+              >
+                <Text style={styles.leagueName}>{item.name}</Text>
+                <View style={styles.dottedDivider} />
+                <Text style={styles.teamName}>{item.team_name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       )}
 
       {/* ➕ "Create a League" Button */}
@@ -142,46 +148,44 @@ const CreateJoinScreen = ({ navigation, currentUser, onLeagueChosen }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#1E1E1E",  paddingHorizontal: 15, paddingTop: 40 },
+  container: { flex: 1, backgroundColor: "#1E1E1E",  paddingHorizontal: 15, paddingTop: 0 },
   title: { fontSize: 24, fontWeight: "bold", color: "#fff", marginVertical: 40, textAlign: "center"},
   subtitle: { fontSize: 20, fontWeight: "bold", color: "#bbb", marginBottom: 0 },
   emptyText: { fontSize: 16, color: "#777", textAlign:"center",marginBottom: 20 },
  // leagueCard: { backgroundColor: "#333", padding: 15, borderRadius: 8, alignItems: "center" },
   //leagueName: { color: "#fff", fontSize: 18, fontWeight: "bold" },
-  buttonList: {flex : 1, alignItems:"center"},
+  buttonList: {flex : 1, alignItems:"center", marginVertical: 15},
   createLeagueContainer: { flexDirection: "row", alignItems: "center", gap: 10 },
   input: { width: "60%", padding: 10, borderWidth: 1, borderColor: "#666", borderRadius: 8, marginBottom: 10, color: "#fff", backgroundColor: "#333" },
   button: { backgroundColor: "#4CAF50", padding: 12, borderRadius: 8, marginVertical: 10, width: "60%" },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold", textAlign:"center" },
   buttonNew :{ backgroundColor: "#4CAF50", padding: 12, borderRadius: 8, alignItems: "center", marginVertical: 10, width: "80%" },
+  listContainer: {
+    height: "60%",  /* ✅ Fixes height so the list doesn't push elements down */
+    overflow: "hidden",  /* ✅ Prevents the list from expanding indefinitely */
+  },
   cardContainer: {
     width: "100%",
-    height : "90%",
-    // Overall card layout
-    marginVertical: 10,
+    height : "auto",
+    marginVertical: 20,
     marginHorizontal: 0,
     borderRadius: 15,
-
-    
-    // Shadows (iOS + Android)
     shadowColor: '#FFF',
     shadowOffset: { width: 10, height: 9 },
     shadowOpacity: 1,
     shadowRadius: 15,
-    elevation: 4, // for Android
-    
-    // Background color (in case gradient not used, or fallback)
+    elevation: 4, 
     backgroundColor: '#333',
-    // So corners stay rounded if you use a child gradient
     overflow: 'hidden',
   },
+
   
   // If you're using react-native-linear-gradient,
   // apply these styles to the <LinearGradient> as a child of cardContainer
   gradientBackground: {
     // Fills entire card area
     flex: 1,
-    padding: 16, 
+    padding: 1, 
     justifyContent: 'center',
   },
 
@@ -199,7 +203,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.3)', // or any color you want
     borderStyle: 'dotted',
-    marginVertical: 10,
+    marginVertical: 0,
   },
 
   teamName: {

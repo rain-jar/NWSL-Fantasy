@@ -3,6 +3,8 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, FlatList, TouchableOp
 import { Picker } from "@react-native-picker/picker";
 import supabase from "./supabaseClient";
 import {subscribeToLeagueInserts} from "./supabaseListeners";
+import DropDownPicker from "react-native-dropdown-picker";
+
 
 
 const LeagueSetupScreen = ({ route, navigation, onLeagueChosen }) => {
@@ -11,6 +13,8 @@ const LeagueSetupScreen = ({ route, navigation, onLeagueChosen }) => {
   const [leagueType, setLeagueType] = useState("Standard H2H"); // Default league type
   const [availableLeagues, setAvailableLeagues] = useState([]);
   const [selectedLeague, setSelectedLeague] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [selectedLeagueType, setSelectedLeagueType] = useState("Standard H2H");
 
 
 useEffect(() => {
@@ -173,11 +177,19 @@ useEffect(() => {
 
           {/* League Type (Fixed for Now) */}
           <Text style={styles.label}>League Type</Text>
-          <View style={styles.pickerContainer}>
-            <Picker selectedValue={leagueType} enabled={false} style={styles.picker}>
-              <Picker.Item label="Standard H2H" value="Standard H2H" />
-            </Picker>
-          </View>
+          
+            <DropDownPicker
+              open={open}
+              value={selectedLeagueType} // ✅ Controls selected item
+              items={[
+                { label: "Standard H2H", value: "Standard H2H" } // ✅ Single option for now
+              ]}
+              setOpen={setOpen}
+              setValue={setSelectedLeagueType}
+              disabled={true} // ✅ Keeps it disabled since there's only one option
+              style={styles.dropdownPicker}
+          />
+
 
           {/* Team Name Input */}
           <Text style={styles.label}>Your Team Name</Text>
@@ -262,10 +274,18 @@ const styles = StyleSheet.create({
     alignSelf:"center",
   },
   pickerContainer: {
-    backgroundColor: "#333",
+    backgroundColor: "#000",
     borderRadius: 8,
     marginBottom: 20,
     width: "100%",
+  },
+  dropdownPicker: {
+    backgroundColor: "#555", // ✅ Matches dark theme
+    borderColor: "#777",
+    color: "white",
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 10,
   },
   picker: {
     color: "#fff",

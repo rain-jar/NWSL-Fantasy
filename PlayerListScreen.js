@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Image, TextInput, FlatList, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Modal, Button } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-//import playerDataNew from "./assets/players.json";
 import { ScrollView } from "react-native";
-//import { ScrollView } from "react-native-gesture-handler";
 import supabase from "./supabaseClient";
 import { LeagueProvider, useLeague } from "./LeagueContext";
 import DropDownPicker from 'react-native-dropdown-picker';
-
-
-
-
-
 
 const PlayerListScreen = ({ onAdd, navigation, playerBase }) => {
 
     const { availablePlayers, setAvailablePlayer } = useLeague();
     const { leagueParticipants, setLeagueParticipants, userId } = useLeague();
-    
-  
     const [players, setPlayers] = useState([...playerBase]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedPosition, setSelectedPosition] = useState("");
